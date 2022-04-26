@@ -4,6 +4,8 @@ let prompt_sync = require("prompt-sync")();
 
 /*
 Class to parse input for the "Where In The World" program
+
+TODO check dp of input, (max of 6 -check brief)
  */
 export class ParseInput {
 
@@ -27,7 +29,7 @@ export class ParseInput {
     public start(): void {
         let input = ParseInput.getInput()
         let geoJSONFeatures = this.parseLines(input);
-        this.writeToOutput(geoJSONFeatures)
+        ParseInput.writeToOutput(geoJSONFeatures)
     }
 
     /**
@@ -39,7 +41,7 @@ export class ParseInput {
      */
     private parseLines(inputtedLines : string[]) : object[]{
         let geoJSONFeatures : object[] = []
-        for (let line in inputtedLines) {
+        for (let line of inputtedLines) {
             geoJSONFeatures.push(this.parseLine(line));
         }
         return geoJSONFeatures
@@ -54,9 +56,9 @@ export class ParseInput {
      * @private
      */
     private static getInput(): string[] {
-        console.log("Welcome to 'Where in the world is CS'\n" +
+        process.stdout.write("Welcome to 'Where in the world is CS'\n" +
             "Please enter locations one per line\n" +
-            "Press enter on an empty line to submit")
+            "Press enter on an empty line to submit\n")
         let output: string[] = []
         let currLine;
         currLine = prompt_sync()
@@ -118,7 +120,7 @@ export class ParseInput {
         }
         catch (error){
             if (error instanceof ParseError) {
-                console.log("Line of input could not be parsed!")
+                console.log(`Unable to Process: ${line}`)
             } else {
                 throw error
             }
@@ -149,13 +151,26 @@ export class ParseInput {
      * @private
      * @param geoJSONFeatures array containing GeoJSON feature objects
      */
-    private writeToOutput(geoJSONFeatures : object[]) : void{
-        let geoJSONOutput = {"type" : " FeatureCollection", "features" : []}
-        for (let geoJSON in geoJSONFeatures) {
-            geoJSON["features"].push(geoJSON)
+    private static writeToOutput(geoJSONFeatures : object[]) : void{
+        if (geoJSONFeatures.length > 0) {
+            let geoJSONOutput = {"type": "FeatureCollection", "features": []}
+            for (let geoJSON of geoJSONFeatures) {
+                geoJSONOutput["features"].push(geoJSON)
+            }
+            let fs = require("fs");
+            fs.writeFile("GeoJSON_FeatureCollection.json", JSON.stringify(geoJSONOutput),
+                (err) => {
+                    if (err) {
+                        console.log(err.message)
+                    } else {
+                        console.log("Please see file for GeoJSON output!")
+                    }
+                });
         }
-        let fs = require("fs");
-        fs.writeFile("GeoJSON_FeatureCollection", JSON.stringify(geoJSONOutput))
+        else{
+            // FIXME, isn't working in all cases!
+            console.log("No lines of inputted could be parsed, so no output file was created!")
+        }
     }
 
     /**
@@ -209,12 +224,13 @@ export class ParseInput {
     private static constructGeoJSON(latitude: number, longitude: number, label : string=null) {
         let geoJSON = {
             "type" : "Feature",
+            "properties" : {},
             "geometry": {
-                "type" : "point",
-                "coordinates" : [latitude, longitude]
+                "type" : "Point",
+                "coordinates" : [longitude, latitude]
                 }
             }
-        if (label == null) {
+        if (label != null) {
             geoJSON["properties"] = {"name" : label}
         }
         return geoJSON;
@@ -282,7 +298,7 @@ export class ParseInput {
             return {latitude : secondCoord, longitude : firstCoord}
         }
         else {
-            throw new ParseError("Inputted split line doesnt contain mutually exclusive directions!")
+            throw new ParseError("Inputted split line doesn't contain mutually exclusive directions!")
         }
     }
 
@@ -464,7 +480,7 @@ export class ParseInput {
         for (let i = 0; i < dmsCoords.length; i++) {
             let part = dmsCoords[i]
             console.assert(part.length > 0, "Part must have a length greater than zero!")
-            for (let marker in markers) {
+            for (let marker of markers) {
                 if (part[-1] == marker) {
                     dmsCoords[i] = part.slice(0, -1) // remove marker
                     break
@@ -535,7 +551,7 @@ export class ParseInput {
         }
 
         if (labelComponents.length > 0) {
-            splitLine = splitLine.slice(0, -1)
+            splitLine = splitLine.slice(0, -labelComponents.length)
             return {
                 'label': labelComponents.reverse().join(" "),
                 'coords': splitLine.join(" ")
