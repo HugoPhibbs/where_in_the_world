@@ -25,9 +25,9 @@ describe("Test irrelevant Input", () => {
 
 describe("Test regular standard form", () => {
     test("Length 2 input", () => {
-        let latLongObj = testParseInput.parseCoords("49.5, 170.5")
-        expect(latLongObj.latitude).toEqual(49.5)
-        expect(latLongObj.longitude).toEqual(170.5)
+        let latLongObj1 = testParseInput.parseCoords("49.5, 170.5")
+        expect(latLongObj1.latitude).toEqual(49.5)
+        expect(latLongObj1.longitude).toEqual(170.5)
     })
 })
 
@@ -104,6 +104,7 @@ describe("Test DMS coords", () => {
     test("Test standard Degrees-Minutes-Seconds", () => {
         expect(testParseInput.parseCoords("48 51 8.262, 2 20 49.8084")).toStrictEqual({latitude:48.852295, longitude:2.347169})
         expect(testParseInput.parseCoords("48° 51' 8.262\", 2° 20' 49.8084\"")).toStrictEqual({latitude:48.852295, longitude:2.347169})
+        expect(testParseInput.parseCoords("48° 51' 8.262\" 2° 20' 49.8084\"")).toStrictEqual({latitude:48.852295, longitude:2.347169})
     })
 
     test("Test Degrees-Minutes", () => {
@@ -114,6 +115,7 @@ describe("Test DMS coords", () => {
     test("Test with labels", () => {
         expect(testParseInput.parseLabel("48° 51' 8.262\", 2° 20' 49.8084\" Paris")["label"]).toBe("Paris")
         expect(testParseInput.parseLabel("48° 51' 8.262\", 2° 20' 49.8084\" Central Paris")["label"]).toBe("Central Paris")
+        expect(testParseInput.parseLabel("48° 51' 8.262\" 2° 20' 49.8084\" Central Paris")["label"]).toBe("Central Paris")
     })
 })
 
@@ -122,8 +124,17 @@ test("Test labels", () => {
     expect(testParseInput.parseLabel("90 180 E Dunedin")["label"]).toBe("Dunedin")
     expect(testParseInput.parseLabel("90 180 E North Dunedin")["label"]).toBe("North Dunedin")
     expect(testParseInput.parseLabel("90 180 E Far Far Away")["label"]).toBe("Far Far Away")
+    expect(testParseInput.parseLabel("120 E, 90 N North Dunedin")["label"]).toBe("North Dunedin")
     expect(testParseInput.parseLabel("90 180 E")["label"]).toBe(null)
     expect(testParseInput.parseLabel("90 180")["label"]).toBe(null)
     expect(testParseInput.parseLabel("40° 45' 53.28\", 73° 58' 50.88\"")["label"]).toBe(null)
     expect(testParseInput.parseLabel("40° 45' 53.28\", 73° 58' 50.88\" New York")["label"]).toBe("New York")
+
+    let components1 = testParseInput.parseLabel("90 180 E Far Far Away")
+    expect(components1["label"]).toBe("Far Far Away")
+    expect(components1["coords"]).toBe("90 180 E")
+
+    let components2 = testParseInput.parseLabel("Far Far Away")
+    expect(components2["label"]).toBe("Far Far Away")
+    expect(components2["coords"]).toBe("")
 })
