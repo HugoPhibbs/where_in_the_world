@@ -1,5 +1,6 @@
 import {ParseError} from "./ParseError";
 
+/* For getting input from a user */
 let prompt_sync = require("prompt-sync")();
 
 /**
