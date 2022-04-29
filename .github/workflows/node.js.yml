@@ -32,3 +32,10 @@ jobs:
     - run: npm test
     - name: Push changes
       uses: actions-go/push@v1
+      with:
+        create-commit: true
+        commit-message: 'Node JS build changes'
+        remote: origin
+        author-email: hugophibbs1@gmail.com
+        author-name: '[AUTO] Hugo Phibbs'
+        fail-empty: true
