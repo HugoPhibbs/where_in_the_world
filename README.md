@@ -14,12 +14,16 @@ By Hugo Phibbs*
 ## Using the program via Command line
 - I included all dependencies in the node_modules folder, this should save you from installing them yourself.
 - For the next steps, ensure that you are in the top level directory of this project.
-- Ensure that node is installed before running (node is not installed on lab machines for some reason).
+- Ensure that node and npm is installed before running (node is not installed on lab machines for some reason).
+- To install necessary dependencies just to run the program, enter:
+```shell
+npm install --production
+```
 - To run the project enter:
 ```shell
-node js_out/app/Main.js
+node app/app_js_out/app/Main.js
 ``` 
-- Then follow the prompts, a file will be created when finished.
+- Then follow the prompts, a file will be created in the app folder when finished.
 
 ## Examples
 
