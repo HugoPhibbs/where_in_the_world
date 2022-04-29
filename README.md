@@ -9,20 +9,17 @@ By Hugo Phibbs*
   throw an error if this cannot be done. Then
 - The program first tries to parse with standard form, if this doesn't work, then it tries to parse using the
   Degrees-Minutes-Seconds format
-- The main method for this program is ```ParseInput.parseLine(string)```, this is used for examples bellow
+- The main API method is ```ParseInput.parseLine(string)```, this is used for examples bellow
 
 ## Using the program via Command line
-- For the next steps, ensure that you are in the top level of the project.
-- Compilation does not work on lab machines, as they do not have typescript enabled
-- To compile the project, simply enter: 
-```shell
-tsc
-```
-- Then to run, enter:
+- I included all dependencies in the node_modules folder, this should save you from installing them yourself.
+- For the next steps, ensure that you are in the top level directory of this project.
+- Ensure that node is installed before running (node is not installed on lab machines for some reason).
+- To run the project enter:
 ```shell
 node js_out/app/Main.js
 ``` 
-- Then follow the prompts
+- Then follow the prompts, a file will be created when finished.
 
 ## Examples
 
@@ -87,6 +84,10 @@ let NewYorkGeoJSON = new ParseInput.parseLine("40° 45' 53.28\", 73° 58' 50.88\
 ```
 - Which can be visualised in geoJSON.io (again by placing it in a FeatureCollection):
   ![](C:\Users\Hugo\Documents\where_in_the_world\examples\newyork.png)
+
+## Libraries and External sources
+- Jest was used for testing
+- prompt-sync was used for getting command line input from a user
 
 ## Tests
 - I used Jest for testing, bellow is the test class that I used:
