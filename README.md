@@ -1,5 +1,5 @@
 # Where in the world?
-![Node Build](https://github.com/HugoPhibbs/where_in_the_world/workflows/node.js.yml/badge.svg)
+![Node Build](https://github.com/HugoPhibbs/where_in_the_world/actions/workflows/node.js.yml/badge.svg)
 By Hugo Phibbs*
 
 ## My Approach
