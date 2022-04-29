@@ -21,6 +21,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -30,12 +32,13 @@ jobs:
     - run: npm run build
     - run: npm run "app build"
     - run: npm test
-    - name: Push changes
-      uses: actions-go/push@v1
+    - name: Commit changes
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git commit -m "[AUTO] commit" -a
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
       with:
-        create-commit: true
-        commit-message: 'Node JS build changes'
-        remote: origin
-        author-email: hugophibbs1@gmail.com
-        author-name: '[AUTO] Hugo Phibbs'
-        fail-empty: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
