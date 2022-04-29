@@ -61,7 +61,7 @@ let ParisGeoJSON = new ParseInput.parseLine("48.853524, 2.348262 Paris")
 
 - Which can be visualised on geoJSON.io, by placing it into a FeatureCollection (how output is formatted if using the
   program via command line):
-  ![]()
+  ![](https://github.com/HugoPhibbs/where_in_the_world/blob/main/examples/paris.png)
 
 ### Finding New York
 
@@ -89,7 +89,7 @@ let NewYorkGeoJSON = new ParseInput.parseLine("40° 45' 53.28\", 73° 58' 50.88\
 }
 ```
 - Which can be visualised in geoJSON.io (again by placing it in a FeatureCollection):
-  ![](https://github.com/HugoPhibbs/where_in_the_world/examples/newyork.png)
+  ![](https://github.com/HugoPhibbs/where_in_the_world/blob/main/examples/newyork.png)
 
 ## Libraries and External sources
 - Jest was used for testing
