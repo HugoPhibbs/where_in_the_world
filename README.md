@@ -1,6 +1,8 @@
 # Where in the world?
 ![Node Build](https://github.com/HugoPhibbs/where_in_the_world/actions/workflows/node.js.yml/badge.svg)
-By Hugo Phibbs*
+![TypeScript Build](https://github.com/HugoPhibbs/where_in_the_world/actions/workflows/typescript.yml/badge.svg)
+
+*By Hugo Phibbs*
 
 ## My Approach
 
