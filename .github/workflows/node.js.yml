@@ -38,7 +38,8 @@ jobs:
         git config --local user.name "github-actions[bot]"
     - name: Commit changes
       run: |
-        git commit -m "[AUTO] commit" -a
+        git add .
+        git commit -m "[AUTO] commit"
     - name: Pull Changes
       run: |
         git pull origin
