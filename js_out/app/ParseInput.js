@@ -1,35 +1,32 @@
-import {ParseError} from "./ParseError";
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParseInput = void 0;
+const ParseError_1 = require("./ParseError");
 let prompt_sync = require("prompt-sync")();
-
 /*
 Class to parse input for the "Where In The World" program
  */
-export class ParseInput {
-
-    private longitudeDirections = ["E", "W"]
-    private latitudeDirections= ["N", "S"]
-
-    /**
-     * Valid directions on a map
-     * @private
-     */
-    private validDirections = this.latitudeDirections.concat(this.longitudeDirections)
-
+class ParseInput {
     /**
      * Constructor for a ParseInput object
      */
-    constructor() {}
-
+    constructor() {
+        this.longitudeDirections = ["E", "W"];
+        this.latitudeDirections = ["N", "S"];
+        /**
+         * Valid directions on a map
+         * @private
+         */
+        this.validDirections = this.latitudeDirections.concat(this.longitudeDirections);
+    }
     /*
     Starts getting input from a user
      */
-    public start(): void {
-        let input = ParseInput.getInput()
+    start() {
+        let input = ParseInput.getInput();
         let geoJSONFeatures = this.parseLines(input);
-        ParseInput.writeToOutput(geoJSONFeatures)
+        ParseInput.writeToOutput(geoJSONFeatures);
     }
-
     /**
      * Parses lines of input from a user
      *
@@ -37,14 +34,13 @@ export class ParseInput {
      * @return object array containing GeoJSON objects which are the inputted lines parsed into GeoJSON
      * @private
      */
-    private parseLines(inputtedLines : string[]) : object[]{
-        let geoJSONFeatures : object[] = []
+    parseLines(inputtedLines) {
+        let geoJSONFeatures = [];
         for (let line of inputtedLines) {
             geoJSONFeatures.push(this.parseLine(line));
         }
-        return geoJSONFeatures
+        return geoJSONFeatures;
     }
-
     /**
      * Gets an input of lines from a user.
      *
@@ -53,20 +49,19 @@ export class ParseInput {
      * @return list of strings for the inputted lines from a user
      * @private
      */
-    private static getInput(): string[] {
+    static getInput() {
         process.stdout.write("Welcome to 'Where in the world is CS'\n" +
             "Please enter locations one per line\n" +
-            "Press enter on an empty line to submit\n")
-        let output: string[] = []
+            "Press enter on an empty line to submit\n");
+        let output = [];
         let currLine;
-        currLine = prompt_sync()
-        while (currLine != ""){
+        currLine = prompt_sync();
+        while (currLine != "") {
             output.push(currLine);
-            currLine = prompt_sync()
+            currLine = prompt_sync();
         }
-        return output
+        return output;
     }
-
     /**
      * Parses the part of a line from a user that is assumed to contain coordinates in some form.
      *
@@ -74,21 +69,22 @@ export class ParseInput {
      * @private
      * @param coords string for coordinates
      */
-    public parseCoords(coords : string) : { latitude:number, longitude:number } {
-        let latLongObj
+    parseCoords(coords) {
+        let latLongObj;
         try {
-            latLongObj = this.parseStandardForm(coords)
-        } catch (error) {
-            if (error instanceof ParseError) {
-                latLongObj = this.parseDegreesMinutesSecondsForm(coords)
-            } else {
-                throw error
+            latLongObj = this.parseStandardForm(coords);
+        }
+        catch (error) {
+            if (error instanceof ParseError_1.ParseError) {
+                latLongObj = this.parseDegreesMinutesSecondsForm(coords);
+            }
+            else {
+                throw error;
             }
         }
-        this.checkLatitudeAndLongitude(latLongObj["latitude"], latLongObj["longitude"])
-        return this.roundLatLongObj(latLongObj)
+        this.checkLatitudeAndLongitude(latLongObj["latitude"], latLongObj["longitude"]);
+        return this.roundLatLongObj(latLongObj);
     }
-
     /**
      * Rounds an object describing latitude and longitude as described by roundLatOrLong(number)
      *
@@ -96,13 +92,12 @@ export class ParseInput {
      * @return another object that is latLongObj rounded
      * @private
      */
-    private roundLatLongObj(latLongObj : {latitude:number, longitude:number})  : { latitude:number, longitude:number } {
+    roundLatLongObj(latLongObj) {
         return {
             latitude: ParseInput.roundLatOrLong(latLongObj.latitude),
             longitude: ParseInput.roundLatOrLong(latLongObj.longitude)
-        }
+        };
     }
-
     /**
      * Parses a coordinates line of input from a user
      *
@@ -114,19 +109,19 @@ export class ParseInput {
      * @return a the inputted line parsed into a GeoJSON object
      * @private
      */
-    public parseLine(line: string): object {
+    parseLine(line) {
         try {
-             return this.parseLineHelper(line)
+            return this.parseLineHelper(line);
         }
-        catch (error){
-            if (error instanceof ParseError) {
-                console.log(`Unable to Process: ${line}`)
-            } else {
-                throw error
+        catch (error) {
+            if (error instanceof ParseError_1.ParseError) {
+                console.log(`Unable to Process: ${line}`);
+            }
+            else {
+                throw error;
             }
         }
     }
-
     /**
      * Runs basic checks on an inputted line
      *
@@ -135,14 +130,14 @@ export class ParseInput {
      * @param line string for an inputted line
      * @private
      */
-    private static checkLine(line : string) {
+    static checkLine(line) {
         if (line == "") {
-            throw new ParseError("Line cannot be an empty string!")
-        } else if (line == null){
-            throw new ParseError("Line cannot be null")
+            throw new ParseError_1.ParseError("Line cannot be an empty string!");
+        }
+        else if (line == null) {
+            throw new ParseError_1.ParseError("Line cannot be null");
         }
     }
-
     /**
      * Writes a GeoJSON object to a JSON file
      *
@@ -151,28 +146,27 @@ export class ParseInput {
      * @private
      * @param geoJSONFeatures array containing GeoJSON feature objects
      */
-    private static writeToOutput(geoJSONFeatures : object[]) : void{
+    static writeToOutput(geoJSONFeatures) {
         if (geoJSONFeatures.length > 0) {
-            let geoJSONOutput = {"type": "FeatureCollection", "features": []}
+            let geoJSONOutput = { "type": "FeatureCollection", "features": [] };
             for (let geoJSON of geoJSONFeatures) {
-                geoJSONOutput["features"].push(geoJSON)
+                geoJSONOutput["features"].push(geoJSON);
             }
             let fs = require("fs");
-            fs.writeFile("../../GeoJSON_FeatureCollection.json", JSON.stringify(geoJSONOutput),
-                (err) => {
-                    if (err) {
-                        console.log(err.message)
-                    } else {
-                        console.log("Please see top level of project for GeoJSON file output!")
-                    }
-                });
+            fs.writeFile("../../GeoJSON_FeatureCollection.json", JSON.stringify(geoJSONOutput), (err) => {
+                if (err) {
+                    console.log(err.message);
+                }
+                else {
+                    console.log("Please see top level of project for GeoJSON file output!");
+                }
+            });
         }
-        else{
+        else {
             // FIXME, isn't working in all cases!
-            console.log("No lines of inputted could be parsed, so no output file was created!")
+            console.log("No lines of inputted could be parsed, so no output file was created!");
         }
     }
-
     /**
      * Helper for parseLine(string), made it into its own public method in order to throw errors up to test level.
      *
@@ -182,14 +176,13 @@ export class ParseInput {
      * @return object for a GeoJSON object constructed
      * @throws ParseError if the inputted line could not be parsed into GeoJSON
      */
-    public parseLineHelper(line : string) : object {
-        ParseInput.checkLine(line)
-        line = line.trim()
-        let components = this.parseLabel(line)
-        let latLongObj = this.parseCoords(components['coords'])
-        return ParseInput.constructGeoJSON(latLongObj["latitude"], latLongObj["longitude"], components["label"])
+    parseLineHelper(line) {
+        ParseInput.checkLine(line);
+        line = line.trim();
+        let components = this.parseLabel(line);
+        let latLongObj = this.parseCoords(components['coords']);
+        return ParseInput.constructGeoJSON(latLongObj["latitude"], latLongObj["longitude"], components["label"]);
     }
-
     /**
      * Checks if an inputted line can be parsed or not
      *
@@ -198,21 +191,20 @@ export class ParseInput {
      * @param line string for line to be checked
      * @return boolean if the line can be parsed or not
      */
-    public canParseLine(line : string) : boolean {
+    canParseLine(line) {
         try {
-            this.parseLineHelper(line)
-            return true
+            this.parseLineHelper(line);
+            return true;
         }
         catch (error) {
-            if (error instanceof ParseError) {
-                return false
+            if (error instanceof ParseError_1.ParseError) {
+                return false;
             }
             else {
-                throw error
+                throw error;
             }
         }
     }
-
     /**
      * Constructs a GeoJSON object from inputted parameters
      *
@@ -221,21 +213,20 @@ export class ParseInput {
      * @param label string for label of the point this GEOJSON object describes, default is null
      * @private
      */
-    private static constructGeoJSON(latitude: number, longitude: number, label : string=null) {
+    static constructGeoJSON(latitude, longitude, label = null) {
         let geoJSON = {
-            "type" : "Feature",
-            "properties" : {},
+            "type": "Feature",
+            "properties": {},
             "geometry": {
-                "type" : "Point",
-                "coordinates" : [longitude, latitude]
-                }
+                "type": "Point",
+                "coordinates": [longitude, latitude]
             }
+        };
         if (label != null) {
-            geoJSON["properties"] = {"name" : label}
+            geoJSON["properties"] = { "name": label };
         }
         return geoJSON;
     }
-
     /**
      * Parses an input from an user, assuming that it is in standard form.
      *
@@ -247,17 +238,16 @@ export class ParseInput {
      * @return object for the line parsed if it can be
      * @private
      */
-    private parseStandardForm(line : string) : object{
-        let splitLine
+    parseStandardForm(line) {
+        let splitLine;
         if (ParseInput.countCharInString(line, ",") > 0) {
-            splitLine = this.handleStandardFormWithCommas(line)
+            splitLine = this.handleStandardFormWithCommas(line);
         }
         else {
-            splitLine = line.split( " ")
+            splitLine = line.split(" ");
         }
         return this.handleStandardFormSplitLine(splitLine);
     }
-
     /**
      * Parses an input that is assumed to be in standard form, split into each word (elements)
      *
@@ -265,19 +255,18 @@ export class ParseInput {
      * @return object, with keys for latitude and longitude
      * @private
      */
-    private handleStandardFormSplitLine(splitLine : string[]) : object {
+    handleStandardFormSplitLine(splitLine) {
         switch (splitLine.length) {
             case 2:
-                return {latitude : this.convertStringToNumber(splitLine[0]), longitude: this.convertStringToNumber(splitLine[1])};
+                return { latitude: this.convertStringToNumber(splitLine[0]), longitude: this.convertStringToNumber(splitLine[1]) };
             case 3:
                 return this.handleStandardFormLength3(splitLine);
             case 4:
-                return this.handleStandardFormLength4(splitLine)
+                return this.handleStandardFormLength4(splitLine);
             default:
-                throw new ParseError("Inputted line could not be parsed")
+                throw new ParseError_1.ParseError("Inputted line could not be parsed");
         }
     }
-
     /**
      * Handles case where an inputted standard form has a length of 4
      *
@@ -285,23 +274,22 @@ export class ParseInput {
      * @return object with keys for latitude and longitude values
      * @private
      */
-    private handleStandardFormLength4(splitLine : string[]) : object{
-        console.assert(splitLine.length == 4, "Split line must have a length of 4")
-        let firstDirection = splitLine[1]
-        let secondDirection = splitLine[3]
-        let firstCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[0]), firstDirection)
-        let secondCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[2]), secondDirection)
+    handleStandardFormLength4(splitLine) {
+        console.assert(splitLine.length == 4, "Split line must have a length of 4");
+        let firstDirection = splitLine[1];
+        let secondDirection = splitLine[3];
+        let firstCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[0]), firstDirection);
+        let secondCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[2]), secondDirection);
         if (this.latitudeDirections.includes(firstDirection) && this.longitudeDirections.includes(secondDirection)) {
-            return {latitude : firstCoord, longitude : secondCoord}
+            return { latitude: firstCoord, longitude: secondCoord };
         }
         else if (this.longitudeDirections.includes(firstDirection) && this.latitudeDirections.includes(secondDirection)) {
-            return {latitude : secondCoord, longitude : firstCoord}
+            return { latitude: secondCoord, longitude: firstCoord };
         }
         else {
-            throw new ParseError("Inputted split line doesn't contain mutually exclusive directions!")
+            throw new ParseError_1.ParseError("Inputted split line doesn't contain mutually exclusive directions!");
         }
     }
-
     /**
      * Rounds a number for latitude or longitude to 6dp
      *
@@ -309,10 +297,9 @@ export class ParseInput {
      * @return number as described
      * @private
      */
-    private static roundLatOrLong(latOrLong : number) : number{
-        return parseFloat(latOrLong.toFixed(6))
+    static roundLatOrLong(latOrLong) {
+        return parseFloat(latOrLong.toFixed(6));
     }
-
     /**
      * Handles case where an inputted line from a user is in (supposed) standard form, and it has a length of 3
      * (excludes a label)
@@ -321,19 +308,20 @@ export class ParseInput {
      * @return object with keys for latitude and longitude
      * @private
      */
-    private handleStandardFormLength3(splitLine : string[]) : object{
+    handleStandardFormLength3(splitLine) {
         console.assert(splitLine.length == 3, "Split line must have a length of 3");
-        let directionIndex : number
+        let directionIndex;
         if (this.validDirections.includes(splitLine[2])) {
-            directionIndex = 2
-        } else if (this.validDirections.includes(splitLine[1])) {
-            directionIndex = 1
-        } else {
-            throw new ParseError("Split line could not be parsed!")
+            directionIndex = 2;
         }
-        return this.handleStandardFormLengthLength3Helper(splitLine, directionIndex)
+        else if (this.validDirections.includes(splitLine[1])) {
+            directionIndex = 1;
+        }
+        else {
+            throw new ParseError_1.ParseError("Split line could not be parsed!");
+        }
+        return this.handleStandardFormLengthLength3Helper(splitLine, directionIndex);
     }
-
     /**
      * Helper method for handleStandardFormLength3
      *
@@ -344,22 +332,22 @@ export class ParseInput {
      * @return object, for extracted latitude values
      * @private
      */
-    private handleStandardFormLengthLength3Helper(splitLine : string[], directionIndex : number) :object {
+    handleStandardFormLengthLength3Helper(splitLine, directionIndex) {
         console.assert(splitLine.length == 3, "Split line must have a length of 3");
-        console.assert(1 <= directionIndex && directionIndex < 3, "Direction index is not in range")
-        let direction = splitLine[directionIndex]
-        let indexes = [0, 1, 2]
-        indexes.splice(directionIndex, 1)
-        indexes.splice(directionIndex-1, 1)
+        console.assert(1 <= directionIndex && directionIndex < 3, "Direction index is not in range");
+        let direction = splitLine[directionIndex];
+        let indexes = [0, 1, 2];
+        indexes.splice(directionIndex, 1);
+        indexes.splice(directionIndex - 1, 1);
         let firstCoord = this.convertStringToNumber(splitLine[indexes[0]]);
-        let secondCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[directionIndex-1]), direction)
+        let secondCoord = this.convertLongLatWithDirection(this.convertStringToNumber(splitLine[directionIndex - 1]), direction);
         if (this.longitudeDirections.includes(direction)) {
-            return {latitude : firstCoord, longitude : secondCoord}
-        } else {
-            return  {latitude :secondCoord, longitude : firstCoord}
+            return { latitude: firstCoord, longitude: secondCoord };
+        }
+        else {
+            return { latitude: secondCoord, longitude: firstCoord };
         }
     }
-
     /**
      * Converts a given latitude or longitude with a given direction into a number across the whole range of latitude or longitude.
      *
@@ -371,19 +359,18 @@ export class ParseInput {
      * @throws ParseError if the inputted latOrLong value is negative
      * @private
      */
-    private convertLongLatWithDirection(latOrLong : number, direction : string) : number {
+    convertLongLatWithDirection(latOrLong, direction) {
         if (!(this.validDirections.includes(direction))) {
-            throw new ParseError(`Inputted direction ${direction} is not valid!`)
+            throw new ParseError_1.ParseError(`Inputted direction ${direction} is not valid!`);
         }
-        if (latOrLong < 0){
-            throw new ParseError("Inputted latitude or longitude value is negative")
+        if (latOrLong < 0) {
+            throw new ParseError_1.ParseError("Inputted latitude or longitude value is negative");
         }
         if (["S", "W"].includes(direction)) {
-            return -latOrLong
+            return -latOrLong;
         }
-        return latOrLong
+        return latOrLong;
     }
-
     /**
      * Finds out if a given latitude value is in range or not
      *
@@ -391,10 +378,9 @@ export class ParseInput {
      * @return boolean as described
      * @private
      */
-    private latitudeInRange(latitude : number) : boolean {
-        return ParseInput.absValueInRange(latitude, 90)
+    latitudeInRange(latitude) {
+        return ParseInput.absValueInRange(latitude, 90);
     }
-
     /**
      * Finds out if a given longitude value is in range or not
      *
@@ -402,10 +388,9 @@ export class ParseInput {
      * @return boolean as described
      * @private
      */
-    private longitudeInRange(longitude : number) : boolean {
-        return ParseInput.absValueInRange(longitude, 180)
+    longitudeInRange(longitude) {
+        return ParseInput.absValueInRange(longitude, 180);
     }
-
     /**
      * Handles case where a (supposed) input from a user is in standard form and has commas
      *
@@ -414,16 +399,13 @@ export class ParseInput {
      * @throws ParseError if the inputted line is not a valid form
      * @private
      */
-    private handleStandardFormWithCommas(line : string) : string[] {
-        if (ParseInput.countCharInString(line, ",") != 1){
-            throw new ParseError("Inputted line should only contain 1 comma")
+    handleStandardFormWithCommas(line) {
+        if (ParseInput.countCharInString(line, ",") != 1) {
+            throw new ParseError_1.ParseError("Inputted line should only contain 1 comma");
         }
-        return line.split(",").join('').split(" ")
-
+        return line.split(",").join('').split(" ");
     }
-
     // Parsing DMS form
-
     /**
      * Attempts to parse coordinates according to a degrees-minutes-seconds format
      *
@@ -432,18 +414,16 @@ export class ParseInput {
      * @throws ParseError if the inputted coords could not be parsed as described
      * @private
      */
-    private parseDegreesMinutesSecondsForm(coords : string) : object {
-        let splitLine = coords.split(",")
+    parseDegreesMinutesSecondsForm(coords) {
+        let splitLine = coords.split(",");
         if (splitLine.length == 2) {
             return {
-                "latitude" : this.dmsStringToLatLong(splitLine[0]),
-                "longitude" : this.dmsStringToLatLong(splitLine[1])
-                }
-            }
-        throw new ParseError("Could not be parsed to degrees-minutes-seconds format")
+                "latitude": this.dmsStringToLatLong(splitLine[0]),
+                "longitude": this.dmsStringToLatLong(splitLine[1])
+            };
+        }
+        throw new ParseError_1.ParseError("Could not be parsed to degrees-minutes-seconds format");
     }
-
-
     /**
      * Converts a string describing a Degrees-Minutes-Seconds coordinate into a standard form latitude/longitude
      *
@@ -453,27 +433,26 @@ export class ParseInput {
      * @return number for latitude or longitude as described
      * @private
      */
-    private dmsStringToLatLong(dmsString : string) : number {
-        dmsString = dmsString.trim()
-        let latLong : number
+    dmsStringToLatLong(dmsString) {
+        dmsString = dmsString.trim();
+        let latLong;
         let components = this.dmsStringDirection(dmsString);
         let dmsNumArray = this.stringToNumberArray(this.removeMarkersFromDMSForm(components['coords'].split(" ")));
         switch (dmsNumArray.length) {
             case 2:
-                latLong = this.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1])
-                break
+                latLong = this.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1]);
+                break;
             case 3:
-                latLong = this.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1], dmsNumArray[2])
-                break
+                latLong = this.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1], dmsNumArray[2]);
+                break;
             default:
-                throw new ParseError("Input could not be parsed assuming its in DMS form!")
+                throw new ParseError_1.ParseError("Input could not be parsed assuming its in DMS form!");
         }
-        if (components['direction'] != null){
-            return this.convertLongLatWithDirection(latLong, components['direction'])
+        if (components['direction'] != null) {
+            return this.convertLongLatWithDirection(latLong, components['direction']);
         }
         return latLong;
     }
-
     /**
      * Finds the direction specified for a given input of Degrees-Minutes-Seconds from a user
      *
@@ -481,18 +460,17 @@ export class ParseInput {
      * @return object with keys for 'coords' which is the DMS coords part, and 'direction' which is a specified direction of the DMS coords
      * @private
      */
-    private dmsStringDirection(dmsString : string) : {'coords' : string, 'direction' : string} {
-        let dmsArray = dmsString.split(" ")
-        let result = {'coords': null, 'direction' : null};
-        if (this.validDirections.includes(dmsArray[dmsArray.length-1])) {
-            result['coords'] = dmsArray.slice(0, dmsArray.length-1).join(" ")
-            result['direction'] = dmsArray[dmsArray.length-1]
-            return result
+    dmsStringDirection(dmsString) {
+        let dmsArray = dmsString.split(" ");
+        let result = { 'coords': null, 'direction': null };
+        if (this.validDirections.includes(dmsArray[dmsArray.length - 1])) {
+            result['coords'] = dmsArray.slice(0, dmsArray.length - 1).join(" ");
+            result['direction'] = dmsArray[dmsArray.length - 1];
+            return result;
         }
         result['coords'] = dmsString;
-        return result
+        return result;
     }
-
     /**
      * Removes the markers from a Degrees-minutes-seconds form angular coordinates (either latitude or longitude)
      *
@@ -502,21 +480,20 @@ export class ParseInput {
      * @return array as described
      * @private
      */
-    private removeMarkersFromDMSForm(dmsCoords : string[]) {
-        let markers = ["°", "\"", "\'"]
+    removeMarkersFromDMSForm(dmsCoords) {
+        let markers = ["°", "\"", "\'"];
         for (let i = 0; i < dmsCoords.length; i++) {
-            let part = dmsCoords[i]
-            console.assert(part.length > 0, "Part must have a length greater than zero!")
+            let part = dmsCoords[i];
+            console.assert(part.length > 0, "Part must have a length greater than zero!");
             for (let marker of markers) {
                 if (part[-1] == marker) {
-                    dmsCoords[i] = part.slice(0, -1) // remove marker
-                    break
+                    dmsCoords[i] = part.slice(0, -1); // remove marker
+                    break;
                 }
             }
         }
-        return dmsCoords
+        return dmsCoords;
     }
-
     /**
      * Converts an inputted latitude/longitude expressed in degrees-minutes-seconds to
      * standard form decimal degrees.
@@ -529,12 +506,10 @@ export class ParseInput {
      * @return number for standard form latitude/longitude as described
      * @private
      */
-    private dMSToStandardForm(degrees: number, minutes: number, seconds: number=0): number {
-        return degrees + minutes / 60 + seconds / 3600
+    dMSToStandardForm(degrees, minutes, seconds = 0) {
+        return degrees + minutes / 60 + seconds / 3600;
     }
-
     // General methods
-
     /**
      * Checks if inputted latitude and longitude values are valid
      *
@@ -543,12 +518,11 @@ export class ParseInput {
      * @throws ParseError if the inputted latLongObj contains invalid latitude or longitude values
      * @private
      */
-    private checkLatitudeAndLongitude(latitude : number, longitude : number) : void {
-        if (!(this.latitudeInRange(latitude) && this.longitudeInRange(longitude))){
-            throw new ParseError("Latitude and longitude values are not in range!"   )
+    checkLatitudeAndLongitude(latitude, longitude) {
+        if (!(this.latitudeInRange(latitude) && this.longitudeInRange(longitude))) {
+            throw new ParseError_1.ParseError("Latitude and longitude values are not in range!");
         }
     }
-
     /**
      * Finds if there is a label attached to inputted coordinates
      *
@@ -559,39 +533,35 @@ export class ParseInput {
      * @return object with keys for 'coords' and 'label'. If the inputted line does not have a label, then the key for 'label' is left null
      * @private
      */
-    public parseLabel(line : string) : { 'label': string, 'coords' : string } {
-        let splitLine = line.split(" ")
+    parseLabel(line) {
+        let splitLine = line.split(" ");
         if (splitLine.length < 2) {
-            throw new ParseError("Input is invalid!, Needs to have a length of more than 2!")
+            throw new ParseError_1.ParseError("Input is invalid!, Needs to have a length of more than 2!");
         }
         let i = splitLine.length - 1;
-        let lastComponent = ""
-        let labelComponents : string[] = []
-
+        let lastComponent = "";
+        let labelComponents = [];
         while (i >= 0) {
-            lastComponent = splitLine[i]
+            lastComponent = splitLine[i];
             if (!ParseInput.isAlphabetical(lastComponent) || this.validDirections.includes(lastComponent)) {
-                break
+                break;
             }
-            labelComponents.push(lastComponent)
-            i -= 1
+            labelComponents.push(lastComponent);
+            i -= 1;
         }
-
         if (labelComponents.length > 0) {
-            splitLine = splitLine.slice(0, -labelComponents.length)
+            splitLine = splitLine.slice(0, -labelComponents.length);
             return {
                 'label': labelComponents.reverse().join(" "),
                 'coords': splitLine.join(" ")
-            }
+            };
         }
         return {
             'label': null,
             'coords': splitLine.join(" ")
-        }
+        };
     }
-
     // Utility Methods
-
     /**
      * Checks if a string contains only alphabet characters. Not to confused as finding if a string is in alphabetical
      * order
@@ -600,17 +570,16 @@ export class ParseInput {
      * @boolean if a string is alphabetical or not
      * @private
      */
-    private static isAlphabetical(str : string) : boolean {
-        let char
-        for (let i = 0; i < str.length; i ++) {
-            char = str[i]
+    static isAlphabetical(str) {
+        let char;
+        for (let i = 0; i < str.length; i++) {
+            char = str[i];
             if (!(/[a-zA-Z]/).test(char)) {
-                return false
+                return false;
             }
         }
-        return true
+        return true;
     }
-
     /**
      * Counts the number of occurances of a character in a string
      *
@@ -619,17 +588,16 @@ export class ParseInput {
      * @return number for count of a given character as described
      * @private
      */
-    private static countCharInString(str : string, char : string) : number{
-        console.assert(char.length == 1, "Inputted char must have a length of 1")
-        let count = 0
-        for (let i = 0; i< str.length; i++) {
+    static countCharInString(str, char) {
+        console.assert(char.length == 1, "Inputted char must have a length of 1");
+        let count = 0;
+        for (let i = 0; i < str.length; i++) {
             if (str.charAt(i) == char) {
-                count ++
+                count++;
             }
         }
-        return count
+        return count;
     }
-
     /**
      * Attempts to convert a string array to a number array.
      *
@@ -639,18 +607,17 @@ export class ParseInput {
      * @throws ParseError if the inputted could not be converted
      * @private
      */
-    private stringToNumberArray(array : string[]) : number[]{
-        let result : number[] = []
+    stringToNumberArray(array) {
+        let result = [];
         for (let str of array) {
-            let strNum = parseFloat(str)
+            let strNum = parseFloat(str);
             if (isNaN(strNum)) {
-                throw new ParseError("String array could not be converted to a number array")
+                throw new ParseError_1.ParseError("String array could not be converted to a number array");
             }
-            result.push(strNum)
+            result.push(strNum);
         }
-        return result
+        return result;
     }
-
     /**
      * Finds out if the absolute value of a given number is in less than or equal to a number or not
      *
@@ -659,10 +626,9 @@ export class ParseInput {
      * @return boolean as described
      * @private
      */
-    private static absValueInRange(val : number, limit : number) : boolean {
-        return Math.abs(val) <= limit
+    static absValueInRange(val, limit) {
+        return Math.abs(val) <= limit;
     }
-
     /**
      * Finds out if an inputted string is valid or not
      *
@@ -670,10 +636,9 @@ export class ParseInput {
      * @return boolean as described
      * @private
      */
-    private static strIsNumber(val : string) : boolean {
-        return (!isNaN(parseFloat(val)))
+    static strIsNumber(val) {
+        return (!isNaN(parseFloat(val)));
     }
-
     /**
      * Converts a given string to a number
      *
@@ -682,10 +647,12 @@ export class ParseInput {
      * @throw ParseError if the inputted string could not be converted
      * @private
      */
-    private convertStringToNumber(str : string) : number {
+    convertStringToNumber(str) {
         if (ParseInput.strIsNumber(str)) {
-            return parseFloat(str)
+            return parseFloat(str);
         }
-        throw new ParseError("String could not be converted")
+        throw new ParseError_1.ParseError("String could not be converted");
     }
 }
+exports.ParseInput = ParseInput;
+//# sourceMappingURL=ParseInput.js.map

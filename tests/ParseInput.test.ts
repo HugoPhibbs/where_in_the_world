@@ -29,6 +29,12 @@ describe("Test regular standard form", () => {
         expect(latLongObj1.latitude).toEqual(49.5)
         expect(latLongObj1.longitude).toEqual(170.5)
     })
+
+    test("Test with labels", () => {
+        let components = testParseInput.parseLabel("48.853524, 2.348262 Paris");
+        expect(components['label']).toBe("Paris")
+        expect(components['coords']).toBe("48.853524, 2.348262");
+    })
 })
 
 describe("Test range standard form", () => {
@@ -104,7 +110,12 @@ describe("Test DMS coords", () => {
     test("Test standard Degrees-Minutes-Seconds", () => {
         expect(testParseInput.parseCoords("48 51 8.262, 2 20 49.8084")).toStrictEqual({latitude:48.852295, longitude:2.347169})
         expect(testParseInput.parseCoords("48° 51' 8.262\", 2° 20' 49.8084\"")).toStrictEqual({latitude:48.852295, longitude:2.347169})
-        expect(testParseInput.parseCoords("48° 51' 8.262\" 2° 20' 49.8084\"")).toStrictEqual({latitude:48.852295, longitude:2.347169})
+        expect(testParseInput.parseCoords("48° 51' 8.262\", 2° 20' 49.8084\"")).toStrictEqual({latitude:48.852295, longitude:2.347169})
+    })
+    test("Test DMS with directions", () => {
+        let geoJSON = testParseInput.parseLineHelper("40° 45' 53.28\", 73° 58' 50.88\" W New York")
+        expect(geoJSON["properties"]["name"]).toBe("New York")
+        expect(geoJSON["geometry"]["coordinates"]).toStrictEqual([-73.9808, 40.7648])
     })
 
     test("Test Degrees-Minutes", () => {
