@@ -2,8 +2,10 @@ import {ParseError} from "./ParseError";
 
 let prompt_sync = require("prompt-sync")();
 
-/*
-Class to parse input for the "Where In The World" program
+/**
+ * Class to parse input for the "Where In The World" program
+ *
+ * @author Hugo Phibbs
  */
 export class ParseInput {
 
