@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParseInput = void 0;
 const ParseError_1 = require("./ParseError");
+/* For getting input from a user */
 let prompt_sync = require("prompt-sync")();
 /**
  * Class to parse input for the "Where In The World" program
