@@ -8,7 +8,7 @@
 
 - I wrote the entire project with TypeScript, using node to compile.
 - My design philosophy for this program was similar to Etude 1. That is try to parse an input for a given format, then
-  throw an error if this cannot be done. Then
+  throw an error if this cannot be done. 
 - The program first tries to parse with standard form, if this doesn't work, then it tries to parse using the
   Degrees-Minutes-Seconds format
 - The main API method is ```ParseInput.parseLine(string)```, this is used for examples bellow
