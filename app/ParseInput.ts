@@ -1,8 +1,5 @@
 import {ParseError} from "./ParseError";
 
-/* For getting input from a user */
-let prompt_sync = require("prompt-sync")();
-
 /**
  * Class to parse input for the "Where In The World" program
  *
@@ -23,39 +20,6 @@ export class ParseInput {
      * Constructor for a ParseInput object
      */
     constructor() {
-    }
-
-    /*
-    Starts getting input from a user
-     */
-    public start(): void {
-        let input = ParseInput.getInput()
-        let geoJSONFeatures = this.parseLines(input);
-        ParseInput.writeToOutput(geoJSONFeatures)
-    }
-
-    // Handling input
-
-    /**
-     * Gets an input of lines from a user.
-     *
-     * These lines are to be converted into a GeoJSON format
-     *
-     * @return list of strings for the inputted lines from a user
-     * @private
-     */
-    private static getInput(): string[] {
-        process.stdout.write("Welcome to 'Where in the world is CS'\n" +
-            "Please enter locations one per line\n" +
-            "Press enter on an empty line to submit\n")
-        let output: string[] = []
-        let currLine;
-        currLine = prompt_sync()
-        while (currLine != "") {
-            output.push(currLine);
-            currLine = prompt_sync()
-        }
-        return output
     }
 
     // Handling output
@@ -83,48 +47,24 @@ export class ParseInput {
         return geoJSON;
     }
 
-    /**
-     * Writes a GeoJSON object to a JSON file
-     *
-     * The output of this program
-     *
-     * @private
-     * @param geoJSONFeatures array containing GeoJSON feature objects
-     */
-    private static writeToOutput(geoJSONFeatures: object[]): void {
-        if (geoJSONFeatures.length > 0) {
-            let geoJSONOutput = {"type": "FeatureCollection", "features": []}
-            for (let geoJSON of geoJSONFeatures) {
-                geoJSONOutput["features"].push(geoJSON)
-            }
-            let fs = require("fs");
-            fs.writeFile("../../GeoJSON_FeatureCollection.json", JSON.stringify(geoJSONOutput),
-                (err) => {
-                    if (err) {
-                        console.log(err.message)
-                    } else {
-                        console.log("Please see top level of project for GeoJSON file output!")
-                    }
-                });
-        } else {
-            // FIXME, isn't working in all cases!
-            console.log("No lines of inputted could be parsed, so no output file was created!")
-        }
-    }
-
     // Parsing Lines of input
 
     /**
-     * Parses lines of input from a user
+     * Parses lines of input from a user.
+     *
+     * Main method for ParseInput
      *
      * @param inputtedLines
      * @return object array containing GeoJSON features which are the inputted lines parsed into GeoJSON
      * @private
      */
-    private parseLines(inputtedLines: string[]): object[] {
+    public parseLines(inputtedLines: string[]): object[] {
         let geoJSONFeatures: object[] = []
         for (let line of inputtedLines) {
-            geoJSONFeatures.push(this.parseLine(line));
+            let geoJSONFeature = this.parseLine(line)
+            if (geoJSONFeature != null) {
+                geoJSONFeatures.push(geoJSONFeature);
+            }
         }
         return geoJSONFeatures
     }
@@ -137,7 +77,7 @@ export class ParseInput {
      * Line should have coordinates in standard or in DMS form, followed by an optional string label
      *
      * @param line string for line of input from a user
-     * @return a the inputted line parsed into a GeoJSON object
+     * @return a the inputted line parsed into a GeoJSON object, otherwise null if the line couldn't be parsed
      * @private
      */
     public parseLine(line: string): object {
@@ -150,6 +90,7 @@ export class ParseInput {
                 throw error
             }
         }
+        return null
     }
 
     /**
@@ -256,6 +197,7 @@ export class ParseInput {
      */
     public parseCoords(coords: string): { latitude: number, longitude: number } {
         let latLongObj
+        coords = ParseInput.removeCommaFromCoords(coords);
         try {
             latLongObj = this.parseStandardForm(coords)
         } catch (error) {
@@ -278,43 +220,13 @@ export class ParseInput {
      *
      * It is assumed that there is no label attached
      *
-     * @param line string for a line inputted from a user
-     * @return object for the line parsed if it can be
+     * @param coords string for a coords inputted from a user, with separating comma removed
+     * @return object for coords parsed if it can be
      * @private
      */
-    private parseStandardForm(line: string): object {
-        let splitLine
-        if (ParseInput.countCharInString(line, ",") > 0) {
-            splitLine = ParseInput.handleStandardFormWithCommas(line)
-        } else {
-            splitLine = line.split(" ")
-        }
-        return this.handleStandardFormSplitLine(splitLine);
-    }
-
-    /**
-     * Handles case where a (supposed) input from a user is in standard form and has commas
-     *
-     * @param line string for a line of input from a user
-     * @return string array for the inputted line split into its words
-     * @throws ParseError if the inputted line is not a valid form
-     * @private
-     */
-    private static handleStandardFormWithCommas(line: string): string[] {
-        if (ParseInput.countCharInString(line, ",") != 1) {
-            throw new ParseError("Inputted line should only contain 1 comma")
-        }
-        return line.split(",").join('').split(" ")
-    }
-
-    /**
-     * Parses an input that is assumed to be in standard form, split into each word (elements)
-     *
-     * @param splitLine string array for a split line of input from a user
-     * @return object, with keys for latitude and longitude
-     * @private
-     */
-    private handleStandardFormSplitLine(splitLine: string[]): object {
+    private parseStandardForm(coords: string): object {
+        console.assert(ParseInput.countCharInString(coords, ",") == 0, "Line cannot contain commas!")
+        let splitLine = coords.split(" ");
         switch (splitLine.length) {
             case 2:
                 return {
@@ -326,7 +238,7 @@ export class ParseInput {
             case 4:
                 return this.handleStandardFormLength4(splitLine)
             default:
-                throw new ParseError("Inputted line could not be parsed")
+                throw new ParseError("Inputted coords could not be parsed")
         }
     }
 
@@ -410,14 +322,91 @@ export class ParseInput {
      * @private
      */
     private parseDegreesMinutesSecondsForm(coords: string): object {
-        let splitLine = coords.split(",")
-        if (splitLine.length == 2) {
-            return {
-                "latitude": this.dmsStringToLatLong(splitLine[0]),
-                "longitude": this.dmsStringToLatLong(splitLine[1])
-            }
+        console.assert(ParseInput.countCharInString(coords, ",") == 0, "Coordinates cannot contain a separating comma!");
+        // TODO handle length of coords with no comma!
+        let coordsDirectionObj = this.stripDirectionsDMS(coords);
+        coords = coordsDirectionObj['coords']
+        let directions = coordsDirectionObj['directions']
+        let splitCoords = coords.split(" ")
+        let firstCoord, secondCoord;
+        if (!(splitCoords.length == 4 || splitCoords.length == 6)){
+            throw new ParseError("Length of DMS coords is not valid!");
         }
-        throw new ParseError("Could not be parsed to degrees-minutes-seconds format")
+        let mid = Math.floor(splitCoords.length / 2);
+        firstCoord = splitCoords.slice(0, mid).join(" ")
+        secondCoord = splitCoords.slice(mid).join(" ")
+        return {
+            "latitude": this.dmsCoordsToLatLong(firstCoord, directions[0]),
+            "longitude": this.dmsCoordsToLatLong(secondCoord, directions[1])
+        }
+    }
+
+    /**
+     * Removes directions from a coordinate string. Returns any directions in order they were removed
+     *
+     * Used for DMS coordinates only, as ordering of Standard form complicates things.
+     *
+     * @param coords string for coords to be removed
+     * @return object with a key 'coords' for the inputted coords without any directions,
+     * and an array of length 2 containing any direction characters removed. The ordering of this array corresponds to which
+     * coordinate a direction specifies. If a coordinate is not specified by any direction, direction is left null.
+     * @throws ParseError if inputted coordinates contain more than 2 directions
+     * @private
+     */
+    private stripDirectionsDMS(coords: string): {'coords' : string, 'directions' : string[]}  {
+        let splitCoords = coords.split(" ")
+        let directions = [null, null]
+        let directionIndexes = []
+        let lastIndex = splitCoords.length-1
+        let mid = Math.floor(splitCoords.length/2)
+        switch (splitCoords.length) {
+            case 4:
+                break;
+            case 5:
+            case 7:
+                if (this.directionIsValid(splitCoords[mid])){
+                    directions[0] = splitCoords[mid]
+                    directionIndexes.push(mid)
+                }
+                else if (this.directionIsValid(splitCoords[lastIndex])) {
+                    directions[1] = splitCoords[lastIndex]
+                    directionIndexes.push(lastIndex)
+                }
+                break;
+            case 6:
+            case 8:
+                mid --
+                if (this.directionIsValid(splitCoords[mid])) {
+                    directions[0] = splitCoords[mid];
+                    directions[1] = splitCoords[lastIndex]
+                    directionIndexes.push(mid)
+                    directionIndexes.push(lastIndex)
+                }
+                break;
+            default:
+                throw new ParseError("Length of inputted DMS phrase is not valid!")
+        }
+        let i = 0;
+        for (let index of directionIndexes) {
+            splitCoords.splice(index-i, 1);
+            i = 1;
+        }
+        return {
+            'coords' : splitCoords.join(" "),
+            'directions' : directions
+        }
+    }
+
+    /**
+     * Checks if an inputted direction is valid or not
+     *
+     * // TODO refactor code for this!
+     *
+     * @param direction
+     * @private
+     */
+    private directionIsValid(direction : string) : boolean {
+        return this.validDirections.includes(direction)
     }
 
     /**
@@ -425,15 +414,15 @@ export class ParseInput {
      *
      * Accounts for if a Degrees-Minutes-Seconds coordinate doesn't have a value for seconds
      *
-     * @param dmsString string as described
+     * @param dmsCoords string as described
+     * @param direction string for direction of these DMS coords, default is null if no direction specified by user.
      * @return number for latitude or longitude as described
      * @private
      */
-    private dmsStringToLatLong(dmsString: string): number {
-        dmsString = dmsString.trim()
+    private dmsCoordsToLatLong(dmsCoords: string, direction : string=null): number {
+        dmsCoords = dmsCoords.trim()
         let latLong: number
-        let components = this.dmsStringDirection(dmsString);
-        let dmsNumArray = ParseInput.stringToNumberArray(ParseInput.removeMarkersFromDMSForm(components['coords'].split(" ")));
+        let dmsNumArray = ParseInput.stringToNumberArray(ParseInput.removeMarkersFromDMSForm(dmsCoords.split(" ")));
         switch (dmsNumArray.length) {
             case 2:
                 latLong = ParseInput.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1])
@@ -444,29 +433,10 @@ export class ParseInput {
             default:
                 throw new ParseError("Input could not be parsed assuming its in DMS form!")
         }
-        if (components['direction'] != null) {
-            return this.convertLongLatWithDirection(latLong, components['direction'])
+        if (direction != null) {
+            return this.convertLongLatWithDirection(latLong, direction)
         }
         return latLong;
-    }
-
-    /**
-     * Finds the direction specified for a given input of Degrees-Minutes-Seconds from a user
-     *
-     * @param dmsString string for input from a user
-     * @return object with keys for 'coords' which is the DMS coords part, and 'direction' which is a specified direction of the DMS coords
-     * @private
-     */
-    private dmsStringDirection(dmsString: string): { 'coords': string, 'direction': string } {
-        let dmsArray = dmsString.split(" ")
-        let result = {'coords': null, 'direction': null};
-        if (this.validDirections.includes(dmsArray[dmsArray.length - 1])) {
-            result['coords'] = dmsArray.slice(0, dmsArray.length - 1).join(" ")
-            result['direction'] = dmsArray[dmsArray.length - 1]
-            return result
-        }
-        result['coords'] = dmsString;
-        return result
     }
 
     /**
@@ -510,6 +480,26 @@ export class ParseInput {
     }
 
     // General methods
+
+    /**
+     * Removes a separating comma from inputted coordinates, if it exists
+     *
+     * @throw ParseError if the inputted coordinates contain more than one comma
+     * @param coords string for coordinates as inputted from a user
+     * @return inputted coords, with it's separating comma removed if applicable
+     * @private
+     */
+    private static removeCommaFromCoords(coords: string): string {
+        let commaCount = ParseInput.countCharInString(coords, ",")
+        switch (commaCount) {
+            case 0:
+                return coords
+            case 1:
+                return coords.split(",").join('')
+            default:
+                throw new ParseError("Inputted coords should only contain 1 comma")
+        }
+    }
 
     /**
      * Converts a given latitude or longitude with a given direction into a number across the whole range of latitude or longitude.
