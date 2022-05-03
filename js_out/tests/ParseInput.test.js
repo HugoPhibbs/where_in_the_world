@@ -92,15 +92,36 @@ describe("Mixed standard form input", () => {
     });
 });
 describe("Test DMS coords", () => {
+    // TODO add test cases with commas!
+    // TODO test with more than 2 directions, - test throws
+    test("Test directions", () => {
+        expect(testParseInput.canParseLine("48 51 8.262 N N, 2 20 49.8084")).toBeFalsy();
+        expect(testParseInput.canParseLine("48 51 8.262, 2 20 49.8084 N N")).toBeFalsy();
+        expect(testParseInput.canParseLine("48 51 8.262, 2 20 N 49.8084 N")).toBeFalsy();
+        expect(testParseInput.canParseLine("48 51 8.262, 2 20 N 49.8084 N")).toBeFalsy();
+        expect(testParseInput.canParseLine("48 51 8.262, 2 N 20 49.8084 N")).toBeFalsy();
+        expect(testParseInput.canParseLine("48 51 8.262 N, 2 20 49.8084 N N")).toBeFalsy();
+    });
     test("Test standard Degrees-Minutes-Seconds", () => {
         expect(testParseInput.parseCoords("48 51 8.262, 2 20 49.8084")).toStrictEqual({ latitude: 48.852295, longitude: 2.347169 });
         expect(testParseInput.parseCoords("48° 51' 8.262\", 2° 20' 49.8084\"")).toStrictEqual({ latitude: 48.852295, longitude: 2.347169 });
         expect(testParseInput.parseCoords("48° 51' 8.262\", 2° 20' 49.8084\"")).toStrictEqual({ latitude: 48.852295, longitude: 2.347169 });
     });
+    test("Test without commas", () => {
+        expect(testParseInput.parseCoords("48 51 8.262 2 20 49.8084")).toStrictEqual({ latitude: 48.852295, longitude: 2.347169 });
+        expect(testParseInput.parseCoords("48 51 2 20")).toStrictEqual({ latitude: 48.85, longitude: 2.333333 });
+        expect(testParseInput.parseCoords("40 45 N 73 58 W")).toStrictEqual({ longitude: -73.966667, latitude: 40.75 });
+    });
     test("Test DMS with directions", () => {
         let geoJSON = testParseInput.parseLineHelper("40° 45' 53.28\", 73° 58' 50.88\" W New York");
         expect(geoJSON["properties"]["name"]).toBe("New York");
         expect(geoJSON["geometry"]["coordinates"]).toStrictEqual([-73.9808, 40.7648]);
+        expect(testParseInput.parseCoords("40° 45' 53.28\" S, 73° 58' 50.88\" W")).toStrictEqual({ longitude: -73.9808, latitude: -40.7648 });
+        expect(testParseInput.parseCoords("40° 45' 53.28\" N, 73° 58' 50.88\" E")).toStrictEqual({ longitude: 73.9808, latitude: 40.7648 });
+        expect(testParseInput.parseCoords("40° 45' 53.28\" N, 73° 58' 50.88\"")).toStrictEqual({ longitude: 73.9808, latitude: 40.7648 });
+        expect(testParseInput.parseCoords("40° 45' N, 73° 58'")).toStrictEqual({ longitude: 73.966667, latitude: 40.75 });
+        expect(testParseInput.parseCoords("40° 45' N, 73° 58' W")).toStrictEqual({ longitude: -73.966667, latitude: 40.75 });
+        expect(testParseInput.parseCoords("40° 45', 73° 58' W")).toStrictEqual({ longitude: -73.966667, latitude: 40.75 });
     });
     test("Test Degrees-Minutes", () => {
         expect(testParseInput.parseCoords("48° 51', 2° 20'")).toStrictEqual({ latitude: 48.85, longitude: 2.333333 });
