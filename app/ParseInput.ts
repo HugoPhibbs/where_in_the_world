@@ -207,7 +207,8 @@ export class ParseInput {
                 throw error
             }
         }
-        ParseInput.checkLatitudeAndLongitude(latLongObj["latitude"], latLongObj["longitude"])
+        latLongObj['latitude'] = ParseInput.scaleLatitude(latLongObj['latitude']);
+        latLongObj['longitude'] = ParseInput.scaleLongitude(latLongObj['longitude'])
         return ParseInput.roundLatLongObj(latLongObj)
     }
 
@@ -329,7 +330,7 @@ export class ParseInput {
         let directions = coordsDirectionObj['directions']
         let splitCoords = coords.split(" ")
         let firstCoord, secondCoord;
-        if (!(splitCoords.length == 4 || splitCoords.length == 6)){
+        if (!(splitCoords.length == 4 || splitCoords.length == 6)) {
             throw new ParseError("Length of DMS coords is not valid!");
         }
         let mid = Math.floor(splitCoords.length / 2);
@@ -353,29 +354,28 @@ export class ParseInput {
      * @throws ParseError if inputted coordinates contain more than 2 directions
      * @private
      */
-    private stripDirectionsDMS(coords: string): {'coords' : string, 'directions' : string[]}  {
+    private stripDirectionsDMS(coords: string): { 'coords': string, 'directions': string[] } {
         let splitCoords = coords.split(" ")
         let directions = [null, null]
         let directionIndexes = []
-        let lastIndex = splitCoords.length-1
-        let mid = Math.floor(splitCoords.length/2)
+        let lastIndex = splitCoords.length - 1
+        let mid = Math.floor(splitCoords.length / 2)
         switch (splitCoords.length) {
             case 4:
                 break;
             case 5:
             case 7:
-                if (this.directionIsValid(splitCoords[mid])){
+                if (this.directionIsValid(splitCoords[mid])) {
                     directions[0] = splitCoords[mid]
                     directionIndexes.push(mid)
-                }
-                else if (this.directionIsValid(splitCoords[lastIndex])) {
+                } else if (this.directionIsValid(splitCoords[lastIndex])) {
                     directions[1] = splitCoords[lastIndex]
                     directionIndexes.push(lastIndex)
                 }
                 break;
             case 6:
             case 8:
-                mid --
+                mid--
                 if (this.directionIsValid(splitCoords[mid])) {
                     directions[0] = splitCoords[mid];
                     directions[1] = splitCoords[lastIndex]
@@ -388,12 +388,12 @@ export class ParseInput {
         }
         let i = 0;
         for (let index of directionIndexes) {
-            splitCoords.splice(index-i, 1);
+            splitCoords.splice(index - i, 1);
             i = 1;
         }
         return {
-            'coords' : splitCoords.join(" "),
-            'directions' : directions
+            'coords': splitCoords.join(" "),
+            'directions': directions
         }
     }
 
@@ -405,7 +405,7 @@ export class ParseInput {
      * @param direction
      * @private
      */
-    private directionIsValid(direction : string) : boolean {
+    private directionIsValid(direction: string): boolean {
         return this.validDirections.includes(direction)
     }
 
@@ -419,7 +419,7 @@ export class ParseInput {
      * @return number for latitude or longitude as described
      * @private
      */
-    private dmsCoordsToLatLong(dmsCoords: string, direction : string=null): number {
+    private dmsCoordsToLatLong(dmsCoords: string, direction: string = null): number {
         dmsCoords = dmsCoords.trim()
         let latLong: number
         let dmsNumArray = ParseInput.stringToNumberArray(ParseInput.removeMarkersFromDMSForm(dmsCoords.split(" ")));
@@ -509,15 +509,11 @@ export class ParseInput {
      * @param latOrLong number for a latitude or longitude value
      * @param direction string for the direction of latOrLong
      * @return number as described
-     * @throws ParseError if the inputted latOrLong value is negative
      * @private
      */
     private convertLongLatWithDirection(latOrLong: number, direction: string): number {
         if (!(this.validDirections.includes(direction))) {
             throw new ParseError(`Inputted direction ${direction} is not valid!`)
-        }
-        if (latOrLong < 0) {
-            throw new ParseError("Inputted latitude or longitude value is negative")
         }
         if (["S", "W"].includes(direction)) {
             return -latOrLong
@@ -548,6 +544,42 @@ export class ParseInput {
      */
     private static latitudeInRange(latitude: number): boolean {
         return ParseInput.absValueInRange(latitude, 90)
+    }
+
+    /**
+     * Scales a latitude value to be in the range -90 to 90.
+     *
+     * I.e. -100->10
+     * @param latitude number
+     * @return number as described
+     * @private
+     */
+    private static scaleLatitude(latitude: number): number {
+        let mod360 = Math.abs(latitude % 360)
+        let sign = Math.sign(latitude)
+        if (mod360 <= 90) {
+            return sign * mod360
+        } else if (90 < mod360 && mod360 <= 270) {
+            return sign * (180 - mod360);
+        }
+        return sign * (mod360-360)
+    }
+
+    /**
+     * Scales a longitude value to be in range -180 and 180
+     *
+     * @param longitude number
+     * @return number as described
+     * @private
+     */
+    private static scaleLongitude(longitude: number): number {
+        let mod360 = Math.abs(longitude % 360)
+        let sign = Math.sign(longitude)
+        if (mod360 <= 180) {
+            return sign * mod360
+        } else {
+            return sign * (180-longitude)
+        }
     }
 
     /**
