@@ -73,7 +73,6 @@ describe("Mixed standard form input", () => {
         let latLong4 = testParseInput.parseCoords("120, 90 S");
         expect(latLong4.latitude).toBe(-90);
         expect(latLong4.longitude).toBe(120);
-        expect(testParseInput.canParseLine("120, 120S")).toBeFalsy();
     });
     test("Test length 4", () => {
         let latLong1 = testParseInput.parseCoords("120 E, 90 N");
