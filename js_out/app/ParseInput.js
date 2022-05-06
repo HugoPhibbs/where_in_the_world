@@ -202,7 +202,8 @@ class ParseInput {
                 throw error;
             }
         }
-        ParseInput.checkLatitudeAndLongitude(latLongObj["latitude"], latLongObj["longitude"]);
+        latLongObj['latitude'] = ParseInput.scaleLatitude(latLongObj['latitude']);
+        latLongObj['longitude'] = ParseInput.scaleLongitude(latLongObj['longitude']);
         return ParseInput.roundLatLongObj(latLongObj);
     }
     // Parsing Standard Form
@@ -494,15 +495,11 @@ class ParseInput {
      * @param latOrLong number for a latitude or longitude value
      * @param direction string for the direction of latOrLong
      * @return number as described
-     * @throws ParseError if the inputted latOrLong value is negative
      * @private
      */
     convertLongLatWithDirection(latOrLong, direction) {
         if (!(this.validDirections.includes(direction))) {
             throw new ParseError_1.ParseError(`Inputted direction ${direction} is not valid!`);
-        }
-        if (latOrLong < 0) {
-            throw new ParseError_1.ParseError("Inputted latitude or longitude value is negative");
         }
         if (["S", "W"].includes(direction)) {
             return -latOrLong;
@@ -531,6 +528,42 @@ class ParseInput {
      */
     static latitudeInRange(latitude) {
         return ParseInput.absValueInRange(latitude, 90);
+    }
+    /**
+     * Scales a latitude value to be in the range -90 to 90.
+     *
+     * I.e. -100->10
+     * @param latitude number
+     * @return number as described
+     * @private
+     */
+    static scaleLatitude(latitude) {
+        let mod360 = Math.abs(latitude % 360);
+        let sign = Math.sign(latitude);
+        if (mod360 <= 90) {
+            return sign * mod360;
+        }
+        else if (90 < mod360 && mod360 <= 270) {
+            return sign * (180 - mod360);
+        }
+        return sign * (mod360 - 360);
+    }
+    /**
+     * Scales a longitude value to be in range -180 and 180
+     *
+     * @param longitude number
+     * @return number as described
+     * @private
+     */
+    static scaleLongitude(longitude) {
+        let mod360 = Math.abs(longitude % 360);
+        let sign = Math.sign(longitude);
+        if (mod360 <= 180) {
+            return sign * mod360;
+        }
+        else {
+            return sign * (180 - longitude);
+        }
     }
     /**
      * Finds out if a given longitude value is in range or not

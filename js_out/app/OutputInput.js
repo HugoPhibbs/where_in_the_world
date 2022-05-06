@@ -6,7 +6,7 @@
  * they needed their own classes since they would be static methods anyway
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeToOutput = exports.getInput = void 0;
+exports.writeToOutput = exports.fileToLineArray = exports.getInput = void 0;
 /**
  * Gets an input of lines from a user.
  *
@@ -29,6 +29,24 @@ function getInput() {
 }
 exports.getInput = getInput;
 /**
+ * Converts a txt file to an array of strings, one entry for each line of the file
+ *
+ * @param fileDirectory string for directory of a file
+ * @return string[] as described
+ * @private
+ */
+function fileToLineArray(fileDirectory) {
+    let data;
+    try {
+        data = require("fs").readFileSync(fileDirectory, 'utf-8');
+    }
+    catch (error) {
+        throw new Error(`File specified at: '${fileDirectory}' could not be loaded!`);
+    }
+    return data.split("\r\n");
+}
+exports.fileToLineArray = fileToLineArray;
+/**
  * Writes a GeoJSON object to a JSON file.
  *
  * Main file for writing to output
@@ -46,7 +64,7 @@ function writeToOutput(geoJSONFeatures) {
         }
         let fs = require("fs");
         let filePath = "output/GeoJSON_FeatureCollection.json";
-        fs.writeFileSync(`../../${filePath}`, JSON.stringify(geoJSONOutput));
+        fs.writeFileSync(`${filePath}`, JSON.stringify(geoJSONOutput));
         console.log(`Please see '${filePath}' for the created GeoJSON FeatureCollection`);
     }
     else {
