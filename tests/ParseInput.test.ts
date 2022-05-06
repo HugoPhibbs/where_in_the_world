@@ -124,6 +124,8 @@ describe("Test DMS coords", () => {
         expect(testParseInput.canParseLine("48 51 8.262, 2 20 N 49.8084 N")).toBeFalsy()
         expect(testParseInput.canParseLine("48 51 8.262, 2 N 20 49.8084 N")).toBeFalsy()
         expect(testParseInput.canParseLine("48 51 8.262 N, 2 20 49.8084 N N")).toBeFalsy()
+        expect(testParseInput.canParseLine("48 51 8.262 N 2 20 49.8084 N")).toBeTruthy()
+
     })
     test("Test standard Degrees-Minutes-Seconds", () => {
         expect(testParseInput.parseCoords("48 51 8.262, 2 20 49.8084")).toStrictEqual({latitude:48.852295, longitude:2.347169})
