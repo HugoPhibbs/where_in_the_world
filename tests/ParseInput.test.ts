@@ -1,5 +1,6 @@
 import {ParseInput} from "../app/ParseInput";
 import {ParseError} from "../app/ParseError";
+import exp = require("constants");
 
 let testParseInput : ParseInput = new ParseInput();
 
@@ -16,9 +17,6 @@ describe("Test irrelevant Input", () => {
         expect(() => {testParseInput.parseLineHelper("Hugo Phibbs")}).toThrowError(ParseError)
     })
     test("Irrelevant Numbers", () => {
-        expect(testParseInput.canParseLine("120, 120")).toBeFalsy()
-        expect(testParseInput.canParseLine("90 12, 90 12")).toBeFalsy()
-        expect(testParseInput.canParseLine("120, 120")).toBeFalsy()
         expect(testParseInput.canParseLine("120, 120, 120")).toBeFalsy()
     })
 })
@@ -37,23 +35,34 @@ describe("Test regular standard form", () => {
     })
 })
 
-describe("Test range standard form", () => {
-    test("Test range of latitude", () => {
-        expect(testParseInput.canParseLine("91, 170.5")).toBeFalsy()
-        expect(testParseInput.canParseLine("90, 170.5")).toBeTruthy()
-        expect(testParseInput.canParseLine("-91, 170.5")).toBeFalsy()
-        expect(testParseInput.canParseLine("-90, 170.5")).toBeTruthy()
-        expect(testParseInput.canParseLine("10000, 170.5")).toBeFalsy()
-        expect(testParseInput.canParseLine("49.5, 170.5")).toBeTruthy()
+describe("Test out of range standard form", () => {
+    test("Test out of range latitude", () => {
+        expect(testParseInput.parseCoords("5.08 E, 200 N").latitude).toBe(-20)
+        expect(testParseInput.parseCoords("90 N, 8").latitude).toBe(90);
+        expect(testParseInput.parseCoords("100, 20").latitude).toBe(80)
+        expect(testParseInput.parseCoords("190, 20").latitude).toBe(-10)
+        expect(testParseInput.parseCoords("380, 20").latitude).toBe(20)
+        expect(testParseInput.parseCoords("-90 N, 8").latitude).toBe(-90);
+        expect(testParseInput.parseCoords("-100, 20").latitude).toBe(-80)
+        expect(testParseInput.parseCoords("-190, 20").latitude).toBe(10)
+        expect(testParseInput.parseCoords("-380, 20").latitude).toBe(-20)
+        expect(testParseInput.parseCoords("0, 0").latitude).toBe(0)
+        expect(testParseInput.parseCoords("273, 20").latitude).toBe(-87)
+        expect(testParseInput.parseCoords("-273, 20").latitude).toBe(87)
     })
-    test("Test range of longitude", () => {
-        expect(testParseInput.canParseLine("90, 180")).toBeTruthy()
-        expect(testParseInput.canParseLine("90, 181")).toBeFalsy()
-        expect(testParseInput.canParseLine("90, -180")).toBeTruthy()
-        expect(testParseInput.canParseLine("90, -181")).toBeFalsy()
+
+    test("Test out of range longitude", () => {
+        expect(testParseInput.parseCoords("0, 0").longitude).toBe(0)
+        expect(testParseInput.parseCoords("20 E, 70").longitude).toBe(20)
+        expect(testParseInput.parseCoords("100 E, 70").longitude).toBe(100)
+        expect(testParseInput.parseCoords("190 E, 70").longitude).toBe(-10)
+        expect(testParseInput.parseCoords("280 E, 70").longitude).toBe(-100)
+        expect(testParseInput.parseCoords("370 E, 70").longitude).toBe(10)
     })
-    test("Both out of range", () => {
-        expect(testParseInput.canParseLine("91, -181")).toBeFalsy()
+
+    test("Test examples", () => {
+        expect(testParseInput.canParseLine("1000, -2000")).toBeTruthy();
+        expect(testParseInput.parseCoords("5.01 E, 278.9 N").latitude).toBe(-81.1)
     })
 })
 
@@ -107,8 +116,6 @@ describe("Mixed standard form input", () =>{
 })
 
 describe("Test DMS coords", () => {
-    // TODO add test cases with commas!
-    // TODO test with more than 2 directions, - test throws
 
     test("Test directions", () => {
         expect(testParseInput.canParseLine("48 51 8.262 N N, 2 20 49.8084")).toBeFalsy()
