@@ -24,13 +24,12 @@
 npm install --production
 ```
 - Then to run the program, you have two options: You can either enter lines individually via command line, or specify an
-  input file. The input file should be a text file have lines to be processed one per line (i.e. separated by newline
-  characters)
+  input file. The input file should be a text file containing lines to be processed (one per line)
 - To run with input via command line interface:
 ```shell
 node js_out/app/Main.js
 ``` 
-- Other wise specify a file with:
+- Other-wise you can specify a file, please note that file directories are taken to be *relative* to the project directory:
 ```shell
 node js_out/app/Main.js <input_file_directory>
 ```
