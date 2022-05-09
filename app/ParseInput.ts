@@ -9,6 +9,7 @@ export class ParseInput {
 
     private longitudeDirections = ["E", "W"]
     private latitudeDirections = ["N", "S"]
+    private dmsMarkers = ["°", "\"", "\'", "m", "d", "s"]
 
     /**
      * Valid directions on a map
@@ -169,7 +170,7 @@ export class ParseInput {
         let labelComponents: string[] = []
         while (i >= 0) {
             lastComponent = splitLine[i]
-            if (!ParseInput.isAlphabetical(lastComponent) || this.validDirections.includes(lastComponent)) {
+            if (this.isNotLabel(lastComponent)) {
                 break
             }
             labelComponents.push(lastComponent)
@@ -186,6 +187,20 @@ export class ParseInput {
             'label': null,
             'coords': splitLine.join(" ")
         }
+    }
+
+    /**
+     * Function to determine if a string is a label or not.
+     *
+     * Helper method for parseLabel(string)
+     *
+     * @see parseLabel
+     * @param str string to be checked if it's a label
+     * @return boolean as described
+     * @private
+     */
+    private isNotLabel(str: string): boolean {
+        return (!ParseInput.isAlphabetical(str) || this.validDirections.includes(str) || this.dmsMarkers.includes(str))
     }
 
     /**
@@ -324,18 +339,20 @@ export class ParseInput {
      */
     private parseDegreesMinutesSecondsForm(coords: string): object {
         console.assert(ParseInput.countCharInString(coords, ",") == 0, "Coordinates cannot contain a separating comma!");
-        // TODO handle length of coords with no comma!
-        let coordsDirectionObj = this.stripDirectionsDMS(coords);
+        let coordsDirectionObj = this.stripDirectionsDMS(this.removeMarkersFromDMSForm(coords));
         coords = coordsDirectionObj['coords']
         let directions = coordsDirectionObj['directions']
         let splitCoords = coords.split(" ")
         let firstCoord, secondCoord;
+
         if (!(splitCoords.length == 4 || splitCoords.length == 6)) {
             throw new ParseError("Length of DMS coords is not valid!");
         }
+
         let mid = Math.floor(splitCoords.length / 2);
         firstCoord = splitCoords.slice(0, mid).join(" ")
         secondCoord = splitCoords.slice(mid).join(" ")
+
         return {
             "latitude": this.dmsCoordsToLatLong(firstCoord, directions[0]),
             "longitude": this.dmsCoordsToLatLong(secondCoord, directions[1])
@@ -355,6 +372,16 @@ export class ParseInput {
      * @private
      */
     private stripDirectionsDMS(coords: string): { 'coords': string, 'directions': string[] } {
+        /*
+        TODO cases that need to be added.
+
+        Good bc their lengths are all long.
+
+        x d y m z s, x d y m z s | length = 12
+        x d y m, x d y m | length = 8
+        x d y m N, x d y m E | length = 10
+        x d y m z s N , x d y m z s E | length = 14
+         */
         let splitCoords = coords.split(" ")
         let directions = [null, null]
         let directionIndexes = []
@@ -422,7 +449,7 @@ export class ParseInput {
     private dmsCoordsToLatLong(dmsCoords: string, direction: string = null): number {
         dmsCoords = dmsCoords.trim()
         let latLong: number
-        let dmsNumArray = ParseInput.stringToNumberArray(ParseInput.removeMarkersFromDMSForm(dmsCoords.split(" ")));
+        let dmsNumArray = ParseInput.stringToNumberArray(dmsCoords.split(" "));
         switch (dmsNumArray.length) {
             case 2:
                 latLong = ParseInput.dMSToStandardForm(dmsNumArray[0], dmsNumArray[1])
@@ -442,25 +469,24 @@ export class ParseInput {
     /**
      * Removes the markers from a Degrees-minutes-seconds form angular coordinates (either latitude or longitude)
      *
-     * Then returns the inputted array with markers removed if applicable
+     * Then returns the inputted string with markers removed if applicable
      *
-     * @param dmsCoords: array for the degrees-minutes-seconds form of an angular position on earth
-     * @return array as described
+     * This assumes that the inputted dmsCoords are in a 'nice' format. It may break for cases that are designed to be break my cases
+     * however in most realistic cases this should be alright
+     *
+     * @param dmsCoords: string for the degrees-minutes-seconds form of an angular position on earth
+     * @return string as described
      * @private
      */
-    private static removeMarkersFromDMSForm(dmsCoords: string[]) {
-        let markers = ["°", "\"", "\'"]
+    private removeMarkersFromDMSForm(dmsCoords: string): string {
+        let char: string;
         for (let i = 0; i < dmsCoords.length; i++) {
-            let part = dmsCoords[i]
-            console.assert(part.length > 0, "Part must have a length greater than zero!")
-            for (let marker of markers) {
-                if (part[-1] == marker) {
-                    dmsCoords[i] = part.slice(0, -1) // remove marker
-                    break
-                }
+            char = dmsCoords[i]
+            if (this.dmsMarkers.includes(char)) {
+                dmsCoords = dmsCoords.slice(0, i) + dmsCoords.slice(i + 1)
             }
         }
-        return dmsCoords
+        return dmsCoords.split( " ").filter(el => {return el != ""}).join(' ')
     }
 
     /**
@@ -562,7 +588,7 @@ export class ParseInput {
         } else if (90 < mod360 && mod360 <= 270) {
             return sign * (180 - mod360);
         }
-        return sign * (mod360-360)
+        return sign * (mod360 - 360)
     }
 
     /**
@@ -578,7 +604,7 @@ export class ParseInput {
         if (mod360 <= 180) {
             return sign * mod360
         } else {
-            return sign * (180-longitude)
+            return sign * (180 - longitude)
         }
     }
 
