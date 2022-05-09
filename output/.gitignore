@@ -1,4 +1,4 @@
-# Ignore everything in this directory
+# This stackoverflow post helped:
+# https://stackoverflow.com/questions/115983/how-can-i-add-a-blank-directory-to-a-git-repository
 *
-# Except this file
 !.gitignore
