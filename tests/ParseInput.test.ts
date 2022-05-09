@@ -2,7 +2,7 @@ import {ParseInput} from "../app/ParseInput";
 import {ParseError} from "../app/ParseError";
 import exp = require("constants");
 
-chlet testParseInput: ParseInput = new ParseInput();
+let testParseInput: ParseInput = new ParseInput();
 
 describe("Test irrelevant Input", () => {
     test("Empty String", () => {
