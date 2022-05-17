@@ -1,6 +1,6 @@
 import {ParseInput} from "../app/ParseInput";
 import {ParseError} from "../app/ParseError";
-import exp = require("constants");
+import {fileToLineArray} from "../app/OutputInput";
 
 let testParseInput: ParseInput = new ParseInput();
 
@@ -242,4 +242,17 @@ test("Test labels", () => {
     let components2 = testParseInput.parseLabel("Far Far Away")
     expect(components2["label"]).toBe("Far Far Away")
     expect(components2["coords"]).toBe("")
+})
+
+describe("Test file input", () => {
+    test("Testing reading files", () => {
+        expect(fileToLineArray("tests/testfiles/simple.txt")).toStrictEqual(["90 180 E"])
+        expect(fileToLineArray("tests/testfiles/simple_multi_line.txt")).toStrictEqual(["90 180 E", "90 180 W"])
+        expect(fileToLineArray("tests/testfiles/complicated_multi_line.txt")).toStrictEqual([
+            "-45.867100, 170.517806 OwheoOne",
+            "-45.867100, 170.517806 OwheoTwo"])
+    })
+    test("Test with DMS coords, with markers", () =>  {
+        expect(fileToLineArray(("tests/testfiles/dms.txt"))).toStrictEqual(["45°52'01.6\"S 170°31'04.1\"E OwheoOne"])
+    })
 })
