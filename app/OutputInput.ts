@@ -5,6 +5,25 @@
  * they needed their own classes since they would be static methods anyway
  */
 
+import {ParseInput} from "./ParseInput";
+const {EOL}  = require("os");
+
+/**
+ * Handles command line argument input from a user
+ *
+ * @param args String array containing arguments
+ * @return object array for parsed GeoJSON objects from ParseInput
+ */
+export function handleArgInput(args : string[]) : object[] {
+    if (args.length == 1){
+        return new ParseInput().parseLines(fileToLineArray(args[0]))
+    }
+    else {
+        return new ParseInput().parseLines(getInput());
+    }
+}
+
+
 /**
  * Gets an input of lines from a user.
  *
@@ -16,12 +35,12 @@ export function getInput(): string[] {
         "Please enter locations one per line\n" +
         "Press enter on an empty line to submit\n")
     let output: string[] = []
-    let currLine;
-    let prompt_sync = require("prompt-sync")();
-    currLine = prompt_sync()
+    // TODO reconstruct node_modules
+    let readLineSync = require("readline-sync")
+    let currLine = readLineSync.question()
     while (currLine != "") {
         output.push(currLine);
-        currLine = prompt_sync()
+        currLine = readLineSync.question()
     }
     return output
 }
@@ -40,7 +59,7 @@ export function fileToLineArray(fileDirectory : string ) : string[] {
     } catch (error) {
         throw new Error(`File specified at: '${fileDirectory}' could not be loaded!`);
     }
-    return data.split("\r\n")
+    return data.split(EOL)
 }
 
 /**
