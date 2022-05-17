@@ -6,7 +6,8 @@
  */
 
 import {ParseInput} from "./ParseInput";
-const {EOL}  = require("os");
+
+const {EOL} = require("os");
 
 /**
  * Handles command line argument input from a user
@@ -14,12 +15,11 @@ const {EOL}  = require("os");
  * @param args String array containing arguments
  * @return object array for parsed GeoJSON objects from ParseInput
  */
-export function handleArgInput(args : string[]) : object[] {
+export function handleArgInput(args: string[]): object[] {
     console.assert(args.length < 2, "Only one input directory should be entered, otherwise it should be none")
-    if (args.length == 1){
+    if (args.length == 1) {
         return new ParseInput().parseLines(fileToLineArray(args[0]))
-    }
-    else {
+    } else {
         return new ParseInput().parseLines(getInput());
     }
 }
@@ -53,10 +53,10 @@ export function getInput(): string[] {
  * @return string[] as described
  * @private
  */
-export function fileToLineArray(fileDirectory : string ) : string[] {
+export function fileToLineArray(fileDirectory: string): string[] {
     let data;
     try {
-         data = require("fs").readFileSync(fileDirectory ,'utf-8');
+        data = require("fs").readFileSync(fileDirectory, 'utf-8');
     } catch (error) {
         throw new Error(`File specified at: '${fileDirectory}' could not be loaded!`);
     }

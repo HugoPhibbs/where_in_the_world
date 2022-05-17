@@ -8,7 +8,7 @@ export class ParseError extends Error {
      *
      * @param message String for a message to accompany this error
      */
-    constructor(message : string) {
+    constructor(message: string) {
         super(message);
     }
 }

@@ -88,7 +88,7 @@ export class ParseInput {
             if (error instanceof ParseError) {
                 console.log(`Unable to Process: ${line}`)
             } else {
-                throw error
+                throw new ParseError("Line of input could not be parsed!");
             }
         }
         return null
@@ -476,7 +476,9 @@ export class ParseInput {
                 dmsCoords = ParseInput.replaceCharAt(dmsCoords, i, " ")
             }
         }
-        return dmsCoords.split( " ").filter(el => {return el != ""}).join(' ')
+        return dmsCoords.split(" ").filter(el => {
+            return el != ""
+        }).join(' ')
     }
 
     /**
@@ -742,7 +744,7 @@ export class ParseInput {
      * @return changed str
      * @private
      */
-    private static replaceCharAt(str : string, index : number, char : string){
-        return str.substring(0, index) + char + str.substring(index+1);
+    private static replaceCharAt(str: string, index: number, char: string) {
+        return str.substring(0, index) + char + str.substring(index + 1);
     }
 }

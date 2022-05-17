@@ -257,7 +257,7 @@ describe("Test file input", () => {
             "-45.867100, 170.517806 OwheoOne",
             "-45.867100, 170.517806 OwheoTwo"])
     })
-    test("Test with DMS coords, with markers", () =>  {
+    test("Test with DMS coords, with markers", () => {
         expect(fileToLineArray(("tests/testfiles/dms.txt"))).toStrictEqual(["45°52'01.6\"S 170°31'04.1\"E OwheoOne"])
     })
 })

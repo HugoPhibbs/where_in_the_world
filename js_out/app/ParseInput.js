@@ -84,7 +84,7 @@ class ParseInput {
                 console.log(`Unable to Process: ${line}`);
             }
             else {
-                throw error;
+                throw new ParseError_1.ParseError("Line of input could not be parsed!");
             }
         }
         return null;
@@ -462,7 +462,9 @@ class ParseInput {
                 dmsCoords = ParseInput.replaceCharAt(dmsCoords, i, " ");
             }
         }
-        return dmsCoords.split(" ").filter(el => { return el != ""; }).join(' ');
+        return dmsCoords.split(" ").filter(el => {
+            return el != "";
+        }).join(' ');
     }
     /**
      * Converts an inputted latitude/longitude expressed in degrees-minutes-seconds to
