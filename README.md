@@ -19,11 +19,17 @@
 - I included all dependencies in the node_modules folder, this should save you from installing them yourself.
 - For the next steps, ensure that you are in the top level directory of this project.
 - Ensure that node and npm is installed before running (node is not installed on lab machines for some reason).
+
+### Setup
+- Ensure that you have npm installed and ready
 - To install necessary dependencies just to run the program, enter:
 ```shell
 npm install --production
 ```
-- Then to run the program, you have two options: You can either enter lines individually via command line, or specify an
+- You may encounter difficulties with character encodings, to remedy this, please ensure that your terminal is encoding in "UTF-8"
+
+### Actually running
+- Now to run the program, you have two options: You can either enter lines individually via command line, or specify an
   input file. The input file should be a text file containing lines to be processed (one per line)
 - To run with input via command line interface:
 ```shell
@@ -31,7 +37,7 @@ node js_out/app/Main.js
 ``` 
 - Other-wise you can specify a file, please note that file directories are taken to be *relative* to the project directory:
 ```shell
-node js_out/app/Main.js <input_file_directory>
+node js_out/app/Main.js input_file_directory
 ```
 
 - Then follow the prompts, a file will then be created at ```<project_directory>/output/GeoJSON_FeatureCollection.json```
@@ -111,7 +117,7 @@ let NewYorkGeoJSON = new ParseInput.parseLine("40° 45' 53.28\", 73° 58' 50.88\
 ## Tests
 
 - I used Jest for testing, bellow is the test class that I used:
-- This can be found in 'tests/ParseInput.test.ts'
+- This can be found in 'tests/WhereInTheWorld.test.ts'
 
 ```typescript
 import {ParseInput} from "../app/ParseInput";
