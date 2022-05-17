@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ParseInput_1 = require("../app/ParseInput");
 const ParseError_1 = require("../app/ParseError");
+const OutputInput_1 = require("../app/OutputInput");
 let testParseInput = new ParseInput_1.ParseInput();
 describe("Test irrelevant Input", () => {
     test("Empty String", () => {
@@ -216,4 +217,17 @@ test("Test labels", () => {
     expect(components2["label"]).toBe("Far Far Away");
     expect(components2["coords"]).toBe("");
 });
-//# sourceMappingURL=ParseInput.test.js.map
+describe("Test file input", () => {
+    test("Testing reading files", () => {
+        expect((0, OutputInput_1.fileToLineArray)("tests/testfiles/simple.txt")).toStrictEqual(["90 180 E"]);
+        expect((0, OutputInput_1.fileToLineArray)("tests/testfiles/simple_multi_line.txt")).toStrictEqual(["90 180 E", "90 180 W"]);
+        expect((0, OutputInput_1.fileToLineArray)("tests/testfiles/complicated_multi_line.txt")).toStrictEqual([
+            "-45.867100, 170.517806 OwheoOne",
+            "-45.867100, 170.517806 OwheoTwo"
+        ]);
+    });
+    test("Test with DMS coords, with markers", () => {
+        expect((0, OutputInput_1.fileToLineArray)(("tests/testfiles/dms.txt"))).toStrictEqual(["45°52'01.6\"S 170°31'04.1\"E OwheoOne"]);
+    });
+});
+//# sourceMappingURL=WhereInTheWorld.test.js.map
