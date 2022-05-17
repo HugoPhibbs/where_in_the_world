@@ -200,7 +200,7 @@ export class ParseInput {
      * @private
      */
     private isNotLabel(str: string): boolean {
-        return (!ParseInput.isAlphabetical(str) || this.validDirections.includes(str) || this.dmsMarkers.includes(str))
+        return (!ParseInput.isAlphabetical(str) || this.directionIsValid(str) || this.dmsMarkers.includes(str))
     }
 
     /**
@@ -269,9 +269,9 @@ export class ParseInput {
     private handleStandardFormLength3(splitLine: string[]): object {
         console.assert(splitLine.length == 3, "Split line must have a length of 3");
         let directionIndex: number
-        if (this.validDirections.includes(splitLine[2])) {
+        if (this.directionIsValid(splitLine[2])) {
             directionIndex = 2
-        } else if (this.validDirections.includes(splitLine[1])) {
+        } else if (this.directionIsValid(splitLine[1])) {
             directionIndex = 1
         } else {
             throw new ParseError("Split line could not be parsed!")
@@ -372,16 +372,6 @@ export class ParseInput {
      * @private
      */
     private stripDirectionsDMS(coords: string): { 'coords': string, 'directions': string[] } {
-        /*
-        TODO cases that need to be added.
-
-        Good bc their lengths are all long.
-
-        x d y m z s, x d y m z s | length = 12
-        x d y m, x d y m | length = 8
-        x d y m N, x d y m E | length = 10
-        x d y m z s N , x d y m z s E | length = 14
-         */
         let splitCoords = coords.split(" ")
         let directions = [null, null]
         let directionIndexes = []
@@ -426,8 +416,6 @@ export class ParseInput {
 
     /**
      * Checks if an inputted direction is valid or not
-     *
-     * // TODO refactor code for this!
      *
      * @param direction
      * @private
@@ -483,7 +471,7 @@ export class ParseInput {
         for (let i = 0; i < dmsCoords.length; i++) {
             char = dmsCoords[i]
             if (this.dmsMarkers.includes(char)) {
-                dmsCoords = dmsCoords.slice(0, i) + dmsCoords.slice(i + 1)
+                dmsCoords = ParseInput.replaceCharAt(dmsCoords, i, " ")
             }
         }
         return dmsCoords.split( " ").filter(el => {return el != ""}).join(' ')
@@ -538,7 +526,7 @@ export class ParseInput {
      * @private
      */
     private convertLongLatWithDirection(latOrLong: number, direction: string): number {
-        if (!(this.validDirections.includes(direction))) {
+        if (!(this.directionIsValid(direction))) {
             throw new ParseError(`Inputted direction ${direction} is not valid!`)
         }
         if (["S", "W"].includes(direction)) {
@@ -741,5 +729,18 @@ export class ParseInput {
             return parseFloat(str)
         }
         throw new ParseError("String could not be converted")
+    }
+
+    /**
+     * Replaces the character of a string at a given index with another
+     *
+     * @param str string to be changed
+     * @param index number of index of character to be changed
+     * @param char string to be placed in str
+     * @return changed str
+     * @private
+     */
+    private static replaceCharAt(str : string, index : number, char : string){
+        return str.substring(0, index) + char + str.substring(index+1);
     }
 }
