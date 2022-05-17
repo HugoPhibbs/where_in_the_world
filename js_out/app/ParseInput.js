@@ -198,6 +198,8 @@ class ParseInput {
     /**
      * Parses the part of a line from a user that is assumed to contain coordinates in some form.
      *
+     * NB: coords are assumed to not have an attached label
+     *
      * @return object with keys for values for latitude and longitude. Each rounded to 6dp
      * @private
      * @param coords string for coordinates
@@ -684,7 +686,7 @@ class ParseInput {
      * @private
      */
     static strIsNumber(val) {
-        return (!isNaN(parseFloat(val)));
+        return !isNaN(Number(val));
     }
     /**
      * Converts a given string to a number

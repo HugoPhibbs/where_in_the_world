@@ -198,6 +198,11 @@ describe("Test DMS coords", () => {
             latitude: 10.083889,
             longitude: 12.279722
         });
+        expect(testParseInput.parseCoords("45°52'01.6\"S 170°31'04.1\"E")).toStrictEqual({
+            latitude: -45.867111,
+            longitude: 170.517806
+        });
+        expect(testParseInput.parseLabel("45°52'01.6\"S 170°31'04.1\"E OwheoOne")["label"]).toStrictEqual("OwheoOne");
     });
 });
 test("Test labels", () => {
