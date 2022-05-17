@@ -16,6 +16,7 @@ const { EOL } = require("os");
  * @return object array for parsed GeoJSON objects from ParseInput
  */
 function handleArgInput(args) {
+    console.assert(args.length < 2, "Only one input directory should be entered, otherwise it should be none");
     if (args.length == 1) {
         return new ParseInput_1.ParseInput().parseLines(fileToLineArray(args[0]));
     }
