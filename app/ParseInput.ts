@@ -206,6 +206,8 @@ export class ParseInput {
     /**
      * Parses the part of a line from a user that is assumed to contain coordinates in some form.
      *
+     * NB: coords are assumed to not have an attached label
+     *
      * @return object with keys for values for latitude and longitude. Each rounded to 6dp
      * @private
      * @param coords string for coordinates
@@ -713,7 +715,7 @@ export class ParseInput {
      * @private
      */
     private static strIsNumber(val: string): boolean {
-        return (!isNaN(parseFloat(val)))
+        return !isNaN(Number(val));
     }
 
     /**
