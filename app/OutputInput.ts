@@ -6,8 +6,7 @@
  */
 
 import {ParseInput} from "./ParseInput";
-
-const {EOL} = require("os");
+import {EOL} from "os"; // For splitting file input
 
 /**
  * Handles command line argument input from a user

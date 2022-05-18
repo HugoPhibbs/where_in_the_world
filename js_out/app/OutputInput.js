@@ -8,7 +8,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.writeToOutput = exports.fileToLineArray = exports.getInput = exports.handleArgInput = void 0;
 const ParseInput_1 = require("./ParseInput");
-const { EOL } = require("os");
+const os_1 = require("os"); // For splitting file input
 /**
  * Handles command line argument input from a user
  *
@@ -61,7 +61,7 @@ function fileToLineArray(fileDirectory) {
     catch (error) {
         throw new Error(`File specified at: '${fileDirectory}' could not be loaded!`);
     }
-    return data.split(EOL);
+    return data.split(os_1.EOL);
 }
 exports.fileToLineArray = fileToLineArray;
 /**
