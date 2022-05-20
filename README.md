@@ -112,6 +112,7 @@ let NewYorkGeoJSON = new ParseInput.parseLine("40° 45' 53.28\", 73° 58' 50.88\
 
 - [jest](https://github.com/facebook/jest) was used for testing
 - [readline-sync](https://github.com/anseki/readline-sync) was used for getting command line input from a user
+- [geojson.io](https://geojson.io/#map=2/20.0/0.0) was used for visualizing
 
 ## Tests
 
