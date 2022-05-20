@@ -16,7 +16,6 @@
 
 ## Using the program via Command line
 
-- I included all dependencies in the node_modules folder, this should save you from installing them yourself.
 - For the next steps, ensure that you are in the top level directory of this project.
 - Ensure that node and npm is installed before running (node is not installed on lab machines for some reason).
 
