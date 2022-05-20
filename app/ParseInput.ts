@@ -51,6 +51,271 @@ export class ParseInput {
     // Parsing Lines of input
 
     /**
+     * Runs basic checks on an inputted line
+     *
+     * Throws a ParseError if the inputted line isn't valid
+     *
+     * @param line string for an inputted line
+     * @private
+     */
+    private static checkLine(line: string) {
+        if (line == "") {
+            throw new ParseError("Line cannot be an empty string!")
+        } else if (line == null) {
+            throw new ParseError("Line cannot be null")
+        }
+    }
+
+    /**
+     * Converts an inputted latitude/longitude expressed in degrees-minutes-seconds to
+     * standard form decimal degrees.
+     *
+     * Credit to: https://www.rapidtables.com/convert/number/degrees-minutes-seconds-to-degrees.html
+     *
+     * @param degrees number
+     * @param minutes number
+     * @param seconds number
+     * @return number for standard form latitude/longitude as described
+     * @private
+     */
+    private static dMSToStandardForm(degrees: number, minutes: number, seconds: number = 0): number {
+        return degrees + minutes / 60 + seconds / 3600
+    }
+
+    /**
+     * Removes a separating comma from inputted coordinates, if it exists
+     *
+     * @throw ParseError if the inputted coordinates contain more than one comma
+     * @param coords string for coordinates as inputted from a user
+     * @return inputted coords, with it's separating comma removed if applicable
+     * @private
+     */
+    private static removeCommaFromCoords(coords: string): string {
+        let commaCount = ParseInput.countCharInString(coords, ",")
+        switch (commaCount) {
+            case 0:
+                return coords
+            case 1:
+                return coords.split(",").join('')
+            default:
+                throw new ParseError("Inputted coords should only contain 1 comma")
+        }
+    }
+
+    /**
+     * Checks if inputted latitude and longitude values are valid
+     *
+     * @param latitude number
+     * @param longitude number
+     * @throws ParseError if the inputted latLongObj contains invalid latitude or longitude values
+     * @private
+     */
+    private static checkLatitudeAndLongitude(latitude: number, longitude: number): void {
+        if (!(ParseInput.latitudeInRange(latitude) && ParseInput.longitudeInRange(longitude))) {
+            throw new ParseError("Latitude and longitude values are not in range!")
+        }
+    }
+
+    /**
+     * Finds out if a given latitude value is in range or not
+     *
+     * @param latitude number value for latitude
+     * @return boolean as described
+     * @private
+     */
+    private static latitudeInRange(latitude: number): boolean {
+        return ParseInput.absValueInRange(latitude, 90)
+    }
+
+    // Lower level parsing methods
+
+    /**
+     * Scales a latitude value to be in the range -90 to 90.
+     *
+     * I.e. -100->10
+     * @param latitude number
+     * @return number as described
+     * @private
+     */
+    private static scaleLatitude(latitude: number): number {
+        let mod360 = Math.abs(latitude % 360)
+        let sign = Math.sign(latitude)
+        if (mod360 <= 90) {
+            return sign * mod360
+        } else if (90 < mod360 && mod360 <= 270) {
+            return sign * (180 - mod360);
+        }
+        return sign * (mod360 - 360)
+    }
+
+    /**
+     * Scales a longitude value to be in range -180 and 180
+     *
+     * @param longitude number
+     * @return number as described
+     * @private
+     */
+    private static scaleLongitude(longitude: number): number {
+        let mod360 = Math.abs(longitude % 360)
+        let sign = Math.sign(longitude)
+        if (mod360 <= 180) {
+            return sign * mod360
+        } else {
+            return sign * (180 - longitude)
+        }
+    }
+
+    /**
+     * Finds out if a given longitude value is in range or not
+     *
+     * @param longitude number value for latitude
+     * @return boolean as described
+     * @private
+     */
+    private static longitudeInRange(longitude: number): boolean {
+        return ParseInput.absValueInRange(longitude, 180)
+    }
+
+    // Parsing Standard Form
+
+    /**
+     * Rounds an object describing latitude and longitude as described by roundLatOrLong(number)
+     *
+     * @param latLongObj object as described
+     * @return another object that is latLongObj rounded
+     * @private
+     */
+    private static roundLatLongObj(latLongObj: { latitude: number, longitude: number }): { latitude: number, longitude: number } {
+        return {
+            latitude: ParseInput.roundLatOrLong(latLongObj.latitude),
+            longitude: ParseInput.roundLatOrLong(latLongObj.longitude)
+        }
+    }
+
+    /**
+     * Rounds a number for latitude or longitude to 6dp
+     *
+     * @param latOrLong number for latitude or longitude
+     * @return number as described
+     * @private
+     */
+    private static roundLatOrLong(latOrLong: number): number {
+        return parseFloat(latOrLong.toFixed(6))
+    }
+
+    /**
+     * Checks if a string contains only alphabet characters. Not to confused as finding if a string is in alphabetical
+     * order
+     *
+     * @param str string to be checked
+     * @boolean if a string is alphabetical or not
+     * @private
+     */
+    private static isAlphabetical(str: string): boolean {
+        let char
+        for (let i = 0; i < str.length; i++) {
+            char = str[i]
+            if (!(/[a-zA-Z]/).test(char)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Counts the number of occurrences of a character in a string
+     *
+     * @param str inputted string
+     * @param char string for a character
+     * @return number for count of a given character as described
+     * @private
+     */
+    private static countCharInString(str: string, char: string): number {
+        console.assert(char.length == 1, "Inputted char must have a length of 1")
+        let count = 0
+        for (let i = 0; i < str.length; i++) {
+            if (str.charAt(i) == char) {
+                count++
+            }
+        }
+        return count
+    }
+
+    // Parsing DMS form
+
+    /**
+     * Attempts to convert a string array to a number array.
+     *
+     * Preserves ordering of elements
+     *
+     * @param array inputted string array
+     * @throws ParseError if the inputted could not be converted
+     * @private
+     */
+    private static stringToNumberArray(array: string[]): number[] {
+        let result: number[] = []
+        for (let str of array) {
+            let strNum = parseFloat(str)
+            if (isNaN(strNum)) {
+                throw new ParseError("String array could not be converted to a number array")
+            }
+            result.push(strNum)
+        }
+        return result
+    }
+
+    /**
+     * Finds out if the absolute value of a given number is in less than or equal to a number or not
+     *
+     * @param val number for value to be checked
+     * @param limit number for a limit of absolute value
+     * @return boolean as described
+     * @private
+     */
+    private static absValueInRange(val: number, limit: number): boolean {
+        return Math.abs(val) <= limit
+    }
+
+    /**
+     * Finds out if an inputted string is valid or not
+     *
+     * @param val string to be checked
+     * @return boolean as described
+     * @private
+     */
+    private static strIsNumber(val: string): boolean {
+        return !isNaN(Number(val));
+    }
+
+    /**
+     * Converts a given string to a number
+     *
+     * @param str value for string
+     * @return number for the inputted string converted
+     * @throw ParseError if the inputted string could not be converted
+     * @private
+     */
+    private static convertStringToNumber(str: string): number {
+        if (ParseInput.strIsNumber(str)) {
+            return parseFloat(str)
+        }
+        throw new ParseError("String could not be converted")
+    }
+
+    /**
+     * Replaces the character of a string at a given index with another
+     *
+     * @param str string to be changed
+     * @param index number of index of character to be changed
+     * @param char string to be placed in str
+     * @return changed str
+     * @private
+     */
+    private static replaceCharAt(str: string, index: number, char: string) {
+        return str.substring(0, index) + char + str.substring(index + 1);
+    }
+
+    /**
      * Parses lines of input from a user.
      *
      * Main method for ParseInput
@@ -69,6 +334,8 @@ export class ParseInput {
         }
         return geoJSONFeatures
     }
+
+    // General methods
 
     /**
      * Parses a coordinates line of input from a user
@@ -112,22 +379,6 @@ export class ParseInput {
     }
 
     /**
-     * Runs basic checks on an inputted line
-     *
-     * Throws a ParseError if the inputted line isn't valid
-     *
-     * @param line string for an inputted line
-     * @private
-     */
-    private static checkLine(line: string) {
-        if (line == "") {
-            throw new ParseError("Line cannot be an empty string!")
-        } else if (line == null) {
-            throw new ParseError("Line cannot be null")
-        }
-    }
-
-    /**
      * Checks if an inputted line can be parsed or not
      *
      * Implemented for easy testing
@@ -147,8 +398,6 @@ export class ParseInput {
             }
         }
     }
-
-    // Lower level parsing methods
 
     /**
      * Finds if there is a label attached to inputted coordinates
@@ -190,20 +439,6 @@ export class ParseInput {
     }
 
     /**
-     * Function to determine if a string is a label or not.
-     *
-     * Helper method for parseLabel(string)
-     *
-     * @see parseLabel
-     * @param str string to be checked if it's a label
-     * @return boolean as described
-     * @private
-     */
-    private isNotLabel(str: string): boolean {
-        return (!ParseInput.isAlphabetical(str) || this.directionIsValid(str) || this.dmsMarkers.includes(str))
-    }
-
-    /**
      * Parses the part of a line from a user that is assumed to contain coordinates in some form.
      *
      * NB: coords are assumed to not have an attached label
@@ -229,7 +464,19 @@ export class ParseInput {
         return ParseInput.roundLatLongObj(latLongObj)
     }
 
-    // Parsing Standard Form
+    /**
+     * Function to determine if a string is a label or not.
+     *
+     * Helper method for parseLabel(string)
+     *
+     * @see parseLabel
+     * @param str string to be checked if it's a label
+     * @return boolean as described
+     * @private
+     */
+    private isNotLabel(str: string): boolean {
+        return (!ParseInput.isAlphabetical(str) || this.directionIsValid(str) || this.dmsMarkers.includes(str))
+    }
 
     /**
      * Parses an input from an user, assuming that it is in standard form.
@@ -307,6 +554,8 @@ export class ParseInput {
         }
     }
 
+    // Utility Methods
+
     /**
      * Handles case where an inputted standard form has a length of 4
      *
@@ -328,8 +577,6 @@ export class ParseInput {
             throw new ParseError("Inputted split line doesn't contain mutually exclusive directions!")
         }
     }
-
-    // Parsing DMS form
 
     /**
      * Attempts to parse coordinates according to a degrees-minutes-seconds format
@@ -482,44 +729,6 @@ export class ParseInput {
     }
 
     /**
-     * Converts an inputted latitude/longitude expressed in degrees-minutes-seconds to
-     * standard form decimal degrees.
-     *
-     * Credit to: https://www.rapidtables.com/convert/number/degrees-minutes-seconds-to-degrees.html
-     *
-     * @param degrees number
-     * @param minutes number
-     * @param seconds number
-     * @return number for standard form latitude/longitude as described
-     * @private
-     */
-    private static dMSToStandardForm(degrees: number, minutes: number, seconds: number = 0): number {
-        return degrees + minutes / 60 + seconds / 3600
-    }
-
-    // General methods
-
-    /**
-     * Removes a separating comma from inputted coordinates, if it exists
-     *
-     * @throw ParseError if the inputted coordinates contain more than one comma
-     * @param coords string for coordinates as inputted from a user
-     * @return inputted coords, with it's separating comma removed if applicable
-     * @private
-     */
-    private static removeCommaFromCoords(coords: string): string {
-        let commaCount = ParseInput.countCharInString(coords, ",")
-        switch (commaCount) {
-            case 0:
-                return coords
-            case 1:
-                return coords.split(",").join('')
-            default:
-                throw new ParseError("Inputted coords should only contain 1 comma")
-        }
-    }
-
-    /**
      * Converts a given latitude or longitude with a given direction into a number across the whole range of latitude or longitude.
      *
      * For example, 120 W is converted to -120.
@@ -537,214 +746,5 @@ export class ParseInput {
             return -latOrLong
         }
         return latOrLong
-    }
-
-    /**
-     * Checks if inputted latitude and longitude values are valid
-     *
-     * @param latitude number
-     * @param longitude number
-     * @throws ParseError if the inputted latLongObj contains invalid latitude or longitude values
-     * @private
-     */
-    private static checkLatitudeAndLongitude(latitude: number, longitude: number): void {
-        if (!(ParseInput.latitudeInRange(latitude) && ParseInput.longitudeInRange(longitude))) {
-            throw new ParseError("Latitude and longitude values are not in range!")
-        }
-    }
-
-    /**
-     * Finds out if a given latitude value is in range or not
-     *
-     * @param latitude number value for latitude
-     * @return boolean as described
-     * @private
-     */
-    private static latitudeInRange(latitude: number): boolean {
-        return ParseInput.absValueInRange(latitude, 90)
-    }
-
-    /**
-     * Scales a latitude value to be in the range -90 to 90.
-     *
-     * I.e. -100->10
-     * @param latitude number
-     * @return number as described
-     * @private
-     */
-    private static scaleLatitude(latitude: number): number {
-        let mod360 = Math.abs(latitude % 360)
-        let sign = Math.sign(latitude)
-        if (mod360 <= 90) {
-            return sign * mod360
-        } else if (90 < mod360 && mod360 <= 270) {
-            return sign * (180 - mod360);
-        }
-        return sign * (mod360 - 360)
-    }
-
-    /**
-     * Scales a longitude value to be in range -180 and 180
-     *
-     * @param longitude number
-     * @return number as described
-     * @private
-     */
-    private static scaleLongitude(longitude: number): number {
-        let mod360 = Math.abs(longitude % 360)
-        let sign = Math.sign(longitude)
-        if (mod360 <= 180) {
-            return sign * mod360
-        } else {
-            return sign * (180 - longitude)
-        }
-    }
-
-    /**
-     * Finds out if a given longitude value is in range or not
-     *
-     * @param longitude number value for latitude
-     * @return boolean as described
-     * @private
-     */
-    private static longitudeInRange(longitude: number): boolean {
-        return ParseInput.absValueInRange(longitude, 180)
-    }
-
-    /**
-     * Rounds an object describing latitude and longitude as described by roundLatOrLong(number)
-     *
-     * @param latLongObj object as described
-     * @return another object that is latLongObj rounded
-     * @private
-     */
-    private static roundLatLongObj(latLongObj: { latitude: number, longitude: number }): { latitude: number, longitude: number } {
-        return {
-            latitude: ParseInput.roundLatOrLong(latLongObj.latitude),
-            longitude: ParseInput.roundLatOrLong(latLongObj.longitude)
-        }
-    }
-
-    /**
-     * Rounds a number for latitude or longitude to 6dp
-     *
-     * @param latOrLong number for latitude or longitude
-     * @return number as described
-     * @private
-     */
-    private static roundLatOrLong(latOrLong: number): number {
-        return parseFloat(latOrLong.toFixed(6))
-    }
-
-    // Utility Methods
-
-    /**
-     * Checks if a string contains only alphabet characters. Not to confused as finding if a string is in alphabetical
-     * order
-     *
-     * @param str string to be checked
-     * @boolean if a string is alphabetical or not
-     * @private
-     */
-    private static isAlphabetical(str: string): boolean {
-        let char
-        for (let i = 0; i < str.length; i++) {
-            char = str[i]
-            if (!(/[a-zA-Z]/).test(char)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Counts the number of occurrences of a character in a string
-     *
-     * @param str inputted string
-     * @param char string for a character
-     * @return number for count of a given character as described
-     * @private
-     */
-    private static countCharInString(str: string, char: string): number {
-        console.assert(char.length == 1, "Inputted char must have a length of 1")
-        let count = 0
-        for (let i = 0; i < str.length; i++) {
-            if (str.charAt(i) == char) {
-                count++
-            }
-        }
-        return count
-    }
-
-    /**
-     * Attempts to convert a string array to a number array.
-     *
-     * Preserves ordering of elements
-     *
-     * @param array inputted string array
-     * @throws ParseError if the inputted could not be converted
-     * @private
-     */
-    private static stringToNumberArray(array: string[]): number[] {
-        let result: number[] = []
-        for (let str of array) {
-            let strNum = parseFloat(str)
-            if (isNaN(strNum)) {
-                throw new ParseError("String array could not be converted to a number array")
-            }
-            result.push(strNum)
-        }
-        return result
-    }
-
-    /**
-     * Finds out if the absolute value of a given number is in less than or equal to a number or not
-     *
-     * @param val number for value to be checked
-     * @param limit number for a limit of absolute value
-     * @return boolean as described
-     * @private
-     */
-    private static absValueInRange(val: number, limit: number): boolean {
-        return Math.abs(val) <= limit
-    }
-
-    /**
-     * Finds out if an inputted string is valid or not
-     *
-     * @param val string to be checked
-     * @return boolean as described
-     * @private
-     */
-    private static strIsNumber(val: string): boolean {
-        return !isNaN(Number(val));
-    }
-
-    /**
-     * Converts a given string to a number
-     *
-     * @param str value for string
-     * @return number for the inputted string converted
-     * @throw ParseError if the inputted string could not be converted
-     * @private
-     */
-    private static convertStringToNumber(str: string): number {
-        if (ParseInput.strIsNumber(str)) {
-            return parseFloat(str)
-        }
-        throw new ParseError("String could not be converted")
-    }
-
-    /**
-     * Replaces the character of a string at a given index with another
-     *
-     * @param str string to be changed
-     * @param index number of index of character to be changed
-     * @param char string to be placed in str
-     * @return changed str
-     * @private
-     */
-    private static replaceCharAt(str: string, index: number, char: string) {
-        return str.substring(0, index) + char + str.substring(index + 1);
     }
 }

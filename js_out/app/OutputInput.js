@@ -36,7 +36,6 @@ function getInput() {
         "Please enter locations one per line\n" +
         "Press enter on an empty line to submit\n");
     let output = [];
-    // TODO reconstruct node_modules
     let readLineSync = require("readline-sync");
     let currLine = readLineSync.question();
     while (currLine != "") {
