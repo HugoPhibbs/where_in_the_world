@@ -25,7 +25,7 @@
 ```shell
 npm install --production
 ```
-- You may encounter difficulties with character encodings, to remedy this, please ensure that your terminal is encoding in "UTF-8"
+- You may encounter difficulties with character encodings, to remedy this, please ensure that your terminal is encoded in "UTF-8"
 
 ### Actually running
 - Now to run the program, you have two options: You can either enter lines individually via command line, or specify an
